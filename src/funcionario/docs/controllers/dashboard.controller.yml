@@ -1,0 +1,180 @@
+/mp/marketplace:
+  get:
+    tags:
+      - Portal/Marketplace
+    summary: List all Marketplace
+    parameters:
+      - name: page
+        type: number
+        in: query
+      - name: perPage
+        type: number
+        in: query
+      - name: search
+        type: string
+        in: query
+      - name: filter_id
+        type: string
+        in: query
+      - name: filter_slug
+        type: string
+        in: query
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: All MarketPlaces
+
+  post:
+    tags:
+      - Portal/Marketplace
+    summary: Create Marketplace
+    parameters:
+      - name: body
+        in: body
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            slug:
+              type: string
+            description:
+              type: string
+            order:
+              type: number
+            is_published:
+              type: boolean
+            icon:
+              type: string
+            filter_id:
+              type: string
+        required:
+          - name
+          - slug
+          - order
+          - is_published
+          - icon
+          - filter_id
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Create MarketPlace
+
+/mp/marketplace/{id}:
+  get:
+    tags:
+      - Portal/Marketplace
+    summary: Get a Marketplace by id
+    parameters:
+      - name: id
+        in: path
+        required: true
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Marketplace
+
+  patch:
+    tags:
+      - Portal/Marketplace
+    summary: Update Marketplace
+    parameters:
+      - name: id
+        in: path
+        required: true
+      - name: body
+        in: body
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            slug:
+              type: string
+            description:
+              type: string
+            order:
+              type: number
+            is_published:
+              type: boolean
+            icon:
+              type: string
+            filter_id:
+              type: string
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Marketplace was updated
+
+  delete:
+    tags:
+      - Portal/Marketplace
+    summary: Delete a Marketplace
+    parameters:
+      - name: id
+        in: path
+        required: true
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Marketplace deleted
+
+/mp/marketplace/order:
+  patch:
+    tags:
+      - Portal/Marketplace
+    summary: Update Order Marketplace
+    parameters:
+      - name: body
+        in: body
+        schema:
+          type: object
+          properties:
+            marketplaces:
+              type: array
+              items:
+                properties:
+                  id:
+                    type: string
+                  order:
+                    type: string
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Marketplace was updated
+
+/mp/marketplace/{filter_slug}/published:
+  get:
+    tags:
+      - Portal/Marketplace
+    summary: List all Marketplace Published
+    parameters:
+      - name: filter_slug
+        in: path
+        required: true
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: All MarketPlaces Published
+
+/mp/marketplace/{id}/organisms:
+  get:
+    tags:
+      - Portal/Marketplace
+    summary: Get a Organisms from Marketplace id
+    parameters:
+      - name: id
+        in: path
+        required: true
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Organisms Marketplace
