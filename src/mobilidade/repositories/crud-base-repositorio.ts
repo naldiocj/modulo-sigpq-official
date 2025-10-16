@@ -57,7 +57,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         'pessoajuridica_id',
         'data_ingresso',
         // 'numero_ordem',
-        'agentes_id',
+        // 'agentes_id',
         'despacho',
         'user_id',
         'ordenante',
@@ -79,7 +79,10 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     const trx = await Database.transaction()
     try {
       this.numeroAutomatico = await this.#numeroAutomaticoService.gerarNumeroAutomatico('Numero_guia');
-      const agentes = input.agentes_id.toString().split(',')
+      const agentes = input.agentes_id?.toString()?.split(',')
+
+      console.log(agentes)
+
       const pf = await this.buscarPessoaPorUserId(input?.user_id)
       const pessoa_id = pf.pessoa_id
 
@@ -104,7 +107,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
 
 
 
-      if (input.situacao == 'actual' || input.situacao == 'anterior') {
+      if (input.situacao == 'actual' || input.situacao == 'anterior' && agentes?.length > 0) {
 
         for (const agente of agentes) {
 

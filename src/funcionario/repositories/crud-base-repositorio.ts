@@ -409,6 +409,7 @@ export default class CrudBaseRepository {
         numero_agente: input?.numero_agente,
         seccao: input?.seccao,
         brigada: input?.brigada,
+        tipo_funcao_id: input?.sigpq_tipo_funcao_id, // AQUI
         email_servico: input?.email_servico,
         contacto_servico: input?.contacto_servico,
         tipo_cargo_id: input?.tipo_cargo_id,
@@ -473,7 +474,7 @@ export default class CrudBaseRepository {
           pessoafisica_id: pessoaId,
           sigpq_situacao_id: input.sigpq_situacao_id,
           sigpq_estado_id: input?.sigpq_estado_id,
-          sigpq_estado_reforma_id: input?.sigpq_estado_reforma_id,
+          // sigpq_estado_reforma_id: input?.sigpq_estado_reforma_id,
           // activo: 1,
           created_at: this.dateTime,
           updated_at: this.dateTime,
@@ -2908,7 +2909,7 @@ export default class CrudBaseRepository {
           "p.user_id",
           "p.activo",
           Database.raw("upper(pf.apelido) as apelido"),
-          "pf.genero",,
+          "pf.genero",
           "pf.nome_pai",
           "pf.nome_mae",
           "pf.nacionalidade_id",
@@ -2938,6 +2939,7 @@ export default class CrudBaseRepository {
           "f.email_servico",
           "f.contacto_servico",
           "f.tipo_cargo_id",
+          "sigpq_tipo_funcaos.nome as funcao",
           "f.tipo_estrutura_organica_id",
           "patentes.nome as patente_nome",
           "patentes.sigpq_tipo_carreira_id as patente_classe",
@@ -2978,6 +2980,7 @@ export default class CrudBaseRepository {
         .innerJoin("pais", "pais.id", "pf.nacionalidade_id")
         .innerJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
         .innerJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
+        .innerJoin("sigpq_tipo_funcaos", "sigpq_tipo_funcaos.id", "f.tipo_funcao_id") // NOVO
         .innerJoin(
           "sigpq_tipo_vinculos",
           "sigpq_tipo_vinculos.id",
@@ -3002,6 +3005,7 @@ export default class CrudBaseRepository {
         .leftJoin("municipios", "municipios.id", "pf.municipio_id")
         .leftJoin("distritos", "distritos.id", "pf.distrito_id")
         .leftJoin("provincias", "provincias.id", "pf.naturalidade_id")
+
         .where("sigpq_provimentos.activo", true)
         .where("p.eliminado", false)
         .where("f.id", id)

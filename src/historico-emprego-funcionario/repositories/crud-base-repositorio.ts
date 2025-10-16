@@ -13,8 +13,8 @@ export default class CrudBaseRepository extends BaseModuloRepository {
   public async registar(input: any, file: any, trxParam = null): Promise<any> {
     let validate = [] 
     try {
-      const camposDesejados: (keyof any)[] = ['pessoafisica_id', 'user_id', 'empresa_id','ano_inicio','cargo','ano_fim',
-        'tipo_de_contrato'];
+      const camposDesejados: (keyof any)[] = ['pessoafisica_id', 'user_id', 'ano_inicio','cargo','ano_fim',
+        'tipo_de_contrato', 'empresa'];
       validate = mapearCampos(input, camposDesejados, [
         'anexo'
       ]);
@@ -61,8 +61,8 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     let validate = []
     try {
 
-      const camposDesejados: (keyof any)[] = ['pessoafisica_id', 'user_id', 'empresa_id','ano_inicio','cargo','ano_fim',
-        'tipo_de_contrato'];
+      const camposDesejados: (keyof any)[] = ['pessoafisica_id', 'user_id', 'ano_inicio','cargo','ano_fim',
+        'tipo_de_contrato', 'empresa'];
       validate = mapearCampos(input, camposDesejados, [
         'anexo',
       ]);
@@ -122,15 +122,16 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         'c.anexo',
         'c.pessoafisica_id',
         'c.cargo',
-        'sigpq_empresas.nome as empresa',
+        // 'sigpq_empresas.nome as empresa',
         'c.ano_inicio',
         'c.ano_fim',
         'c.tipo_de_contrato',
+        'c.empresa',
         'c.activo',
         Database.raw("DATE_FORMAT(c.created_at, '%d/%m/%Y %H:%i:%s') as created_at"),
         Database.raw("DATE_FORMAT(c.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at")
       )
-      .leftJoin('sigpq_empresas', 'sigpq_empresas.id', 'c.empresa_id')
+      // .leftJoin('sigpq_empresas', 'sigpq_empresas.id', 'c.empresa_id')
       .where('c.id', id)
         .orderBy('c.created_at', 'desc')
 
@@ -154,11 +155,12 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         'c.anexo',
         'c.pessoafisica_id',
         'c.cargo',
-        'sigpq_empresas.nome as empresa',
-        'sigpq_empresas.id as empresa_id',
+        // 'sigpq_empresas.nome as empresa',
+        // 'sigpq_empresas.id as empresa_id',
         'c.ano_inicio',
         'c.ano_fim',
         'c.tipo_de_contrato',
+        'c.empresa',
         'c.activo',
         Database.raw("DATE_FORMAT(c.created_at, '%d/%m/%Y %H:%i:%s') as created_at"),
         Database.raw("DATE_FORMAT(c.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at")
