@@ -97,6 +97,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           "s.activo",
           "s.descricao",
           "s.user_id"
+          // "sigpq_tipo_cursos.nome as tipo"
           // Database.raw("upper(u.username) as username"),
           // "sigpq_tipo_formacao.nome as tipo",
           // "sigpq_tipo_formacao.sigla as tipo_sigla",

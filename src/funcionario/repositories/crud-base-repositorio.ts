@@ -409,10 +409,15 @@ export default class CrudBaseRepository {
         numero_agente: input?.numero_agente,
         seccao: input?.seccao,
         brigada: input?.brigada,
+        linguas_internacionais: input?.linguas_internacionais,
+        linguas_nacionais: input?.linguas_nacionais,
+        numero_calcado: input?.numero_calcado,
+        numero_camisa: input?.numero_camisa,
+        motivo_situacao_laboral: input?.motivo_situacao_laboral,
         tipo_funcao_id: input?.sigpq_tipo_funcao_id, // AQUI
         email_servico: input?.email_servico,
         contacto_servico: input?.contacto_servico,
-        tipo_cargo_id: input?.tipo_cargo_id,
+        tipo_cargo_id: input?.sigpq_tipo_cargo_id,
         foto_efectivo: foto_efectivo,
         sigpq_tipo_vinculo_id: input.sigpq_tipo_vinculo_id,
         sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id,
@@ -1458,7 +1463,7 @@ export default class CrudBaseRepository {
           .update({ email_servico: input.email_servico });
       }
 
-       if (input.contacto_servico) {
+      if (input.contacto_servico) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
@@ -1472,11 +1477,53 @@ export default class CrudBaseRepository {
           .update({ seccao: input.seccao });
       }
 
-      if (input.tipo_cargo_id) {
+      if (input?.sigpq_tipo_cargo_id) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
-          .update({ tipo_cargo_id: input.tipo_cargo_id });
+          .update({ tipo_cargo_id: input?.sigpq_tipo_cargo_id });
+      }
+
+      if (input?.sigpq_tipo_funcao_id) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ tipo_funcao_id: input?.sigpq_tipo_funcao_id });
+      }
+
+      if (input?.linguas_internacionais) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ linguas_internacionais: input?.linguas_internacionais });
+      }
+
+      if (input?.linguas_nacionais) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ linguas_nacionais: input?.linguas_nacionais });
+      }
+
+      if (input?.numero_calcado) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ numero_calcado: input?.numero_calcado });
+      }
+
+      if (input?.numero_camisa) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ numero_camisa: input?.numero_camisa });
+      }
+
+      if (input?.motivo_situacao_laboral) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ motivo_situacao_laboral: input?.motivo_situacao_laboral });
       }
 
       if (input.brigada) {
@@ -1485,7 +1532,6 @@ export default class CrudBaseRepository {
           .where("id", id)
           .update({ brigada: input.brigada });
       }
-
 
       if (input.tipo_orgao) {
         await Database.from("sigpq_funcionarios")
@@ -2558,9 +2604,15 @@ export default class CrudBaseRepository {
           "f.id",
           // "t.id",
           // "t.name",
+          "f.motivo_situacao_laboral",
+          "f.linguas_internacionais",
+          "f.linguas_nacionais",
+          "f.numero_calcado",
+          "f.numero_camisa",
           "fe.duracao_inatividade",
           "fe.sigpq_estado_id",
           "fe.sigpq_situacao_id",
+          // "sigpq_funcionario_estados.nome",
           "fe.sigpq_estado_reforma_id",
           "situacao_estado.nome as nome_fora_atividade",
           "es.nome as motivo_desistencia",
@@ -2579,7 +2631,7 @@ export default class CrudBaseRepository {
           )
         )
         .innerJoin("pessoas as p", "p.id", "f.id")
-        
+
         .innerJoin("pessoafisicas as pf", "pf.id", "f.id")
         // .innerJoin("tipo_estrutura_organicas as t", "t.id", "f.tipo_estrutura_organica_id")
 
@@ -2939,6 +2991,12 @@ export default class CrudBaseRepository {
           "f.email_servico",
           "f.contacto_servico",
           "f.tipo_cargo_id",
+          "f.tipo_funcao_id",
+          "f.motivo_situacao_laboral",
+          "f.linguas_internacionais",
+          "f.linguas_nacionais",
+          "f.numero_calcado",
+          "f.numero_camisa",
           "sigpq_tipo_funcaos.nome as funcao",
           "f.tipo_estrutura_organica_id",
           "patentes.nome as patente_nome",
@@ -2980,7 +3038,11 @@ export default class CrudBaseRepository {
         .innerJoin("pais", "pais.id", "pf.nacionalidade_id")
         .innerJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
         .innerJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
-        .innerJoin("sigpq_tipo_funcaos", "sigpq_tipo_funcaos.id", "f.tipo_funcao_id") // NOVO
+        .innerJoin(
+          "sigpq_tipo_funcaos",
+          "sigpq_tipo_funcaos.id",
+          "f.tipo_funcao_id"
+        ) // NOVO
         .innerJoin(
           "sigpq_tipo_vinculos",
           "sigpq_tipo_vinculos.id",
