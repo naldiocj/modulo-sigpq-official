@@ -297,22 +297,36 @@ export default class CrudBaseRepository {
           data_provimento: input?.data_ordem ?? null,
 
           ordem_data: input?.data_ordem ?? null,
-          ordem_descricao:
-            input.regime_id == 1 && input?.numero_ordem
+          // ordem_descricao:
+          //   input.regime_id == 1 && input?.numero_ordem
+          //     ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
+          //     : null,
+          // despacho_descricao:
+          //   input?.regime_id == 2 && input?.numero_despacho
+          //     ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
+          //     : null,
+
+           ordem_descricao: input?.numero_ordem
               ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
               : null,
-          despacho_descricao:
-            input?.regime_id == 2 && input?.numero_despacho
+          despacho_descricao: input?.numero_despacho
               ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
               : null,
 
           despacho_data: input?.data_despacho ?? null,
-          numero_despacho:
-            input?.numero_despacho && input?.regime_id == 2
+          // numero_despacho:
+          //   input?.numero_despacho && input?.regime_id == 2
+          //     ? input?.numero_despacho
+          //     : null,
+          // numero_ordem:
+          //   input.regime_id == 1 && input?.numero_ordem
+          //     ? input?.numero_ordem
+          //     : null,
+
+            numero_despacho: input?.numero_despacho 
               ? input?.numero_despacho
               : null,
-          numero_ordem:
-            input.regime_id == 1 && input?.numero_ordem
+          numero_ordem: input?.numero_ordem
               ? input?.numero_ordem
               : null,
 
@@ -413,6 +427,7 @@ export default class CrudBaseRepository {
         linguas_nacionais: input?.linguas_nacionais,
         numero_calcado: input?.numero_calcado,
         numero_camisa: input?.numero_camisa,
+        numero_calca: input?.numero_calca,
         motivo_situacao_laboral: input?.motivo_situacao_laboral,
         tipo_funcao_id: input?.sigpq_tipo_funcao_id, // AQUI
         email_servico: input?.email_servico,
@@ -1358,22 +1373,37 @@ export default class CrudBaseRepository {
         data_provimento: input.data_ordem ?? null,
 
         ordem_data: input?.data_ordem ?? null,
-        ordem_descricao:
-          input.regime_id == 1 && input?.numero_ordem
+        // ordem_descricao:
+        //   input.regime_id == 1 && input?.numero_ordem
+        //     ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
+        //     : null,
+        // despacho_descricao:
+        //   input?.regime_id == 2 && input?.numero_despacho
+        //     ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
+        //     : null,
+
+        // despacho_data: input?.data_despacho ?? null,
+        // numero_despacho:
+        //   input?.numero_despacho && input?.regime_id == 2
+        //     ? input?.numero_despacho
+        //     : null,
+        // numero_ordem:
+        //   input.regime_id == 1 && input?.numero_ordem
+        //     ? input?.numero_ordem
+        //     : null,
+
+        ordem_descricao: input?.numero_ordem
             ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
             : null,
-        despacho_descricao:
-          input?.regime_id == 2 && input?.numero_despacho
+        despacho_descricao: input?.numero_despacho
             ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
             : null,
 
         despacho_data: input?.data_despacho ?? null,
-        numero_despacho:
-          input?.numero_despacho && input?.regime_id == 2
+        numero_despacho: input?.numero_despacho 
             ? input?.numero_despacho
             : null,
-        numero_ordem:
-          input.regime_id == 1 && input?.numero_ordem
+        numero_ordem: input?.numero_ordem
             ? input?.numero_ordem
             : null,
 
@@ -1517,6 +1547,13 @@ export default class CrudBaseRepository {
           .useTransaction(trx)
           .where("id", id)
           .update({ numero_camisa: input?.numero_camisa });
+      }
+
+      if (input?.numero_calca) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ numero_calca: input?.numero_calca });
       }
 
       if (input?.motivo_situacao_laboral) {
@@ -2997,6 +3034,7 @@ export default class CrudBaseRepository {
           "f.linguas_nacionais",
           "f.numero_calcado",
           "f.numero_camisa",
+          "f.numero_calca",
           "sigpq_tipo_funcaos.nome as funcao",
           "f.tipo_estrutura_organica_id",
           "patentes.nome as patente_nome",
