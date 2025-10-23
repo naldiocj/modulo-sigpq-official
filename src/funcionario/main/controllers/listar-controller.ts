@@ -4,6 +4,8 @@ import ListarRepository from '../../repositories/listar-repositorio';
 import RedisService from 'App/@piips/shared/service/redis/RedisService';
 import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
 import StringHelper from 'App/Helper/String';
+import Event from '@ioc:Adonis/Core/Event'
+import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
 
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 
@@ -24,6 +26,7 @@ export default class Controller {
     const { user, orgao, orgao_detalhes }: any = auth.use('jwt').payload
 
     //console.log("USER:",user,"DETALHES DO ÓRGÃO:",orgao_detalhes)
+
     if (!user) {
       return response.badRequest({
         message: 'Utilizador não está logado',
@@ -87,7 +90,15 @@ export default class Controller {
     const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
 
     try {
-      result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
+      // result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
+
+      
+      result = await saveFuncionarioInRedisDB({key: funcionariokey, options});
+
+
+      // if (result === undefined || result === null || result === "undefined") {
+      //   result = await this.#crud.listarTodos(options_aux); 
+      // }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);
     }

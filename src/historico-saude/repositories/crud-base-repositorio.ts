@@ -229,32 +229,32 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         //   "sigpq_funcionarios.id",
         //   "f.funcionario_id"
         // )
-        // .where("f.eliminado", false)
+        .where("f.eliminado", false)
         .orderBy("f.created_at", "desc")
         .where((query: any) => {
           if (options.funcionario_id) {
             query.where("f.funcionario_id", options.funcionario_id);
           }
-          // if (options.activo) {
-          //   query.where("f.activo", options.activo);
-          // }
+          if (options.activo) {
+            query.where("f.activo", options.activo);
+          }
         })
-        // .where(function (item: any): void {
-        //   if (options.search) {
-        //     item.where(
-        //       "sigpq_funcionarios.nome",
-        //       "like",
-        //       `%${options.search}%`
-        //     );
-        //     item.orWhere("f.nome", "like", `%${options.search}%`);
-        //     item.orWhere("f.contacto", "like", `%${options.search}%`);
-        //     item.orWhere(
-        //       "sigpq_tipo_documentos.nome",
-        //       "like",
-        //       `%${options.search}%`
-        //     );
-        //   }
-        // })
+        .where(function (item: any): void {
+          if (options.search) {
+            item.where(
+              "f.tipo_historico_saude",
+              "like",
+              `%${options.search}%`
+            );
+            item.orWhere("f.grau_parentesco", "like", `%${options.search}%`);
+            item.orWhere("f.qual_historico_saude", "like", `%${options.search}%`);
+            item.orWhere(
+              "f.tempo_historico_saude",
+              "like",
+              `%${options.search}%`
+            );
+          }
+        })
         .clone();
 
       return options.page
@@ -273,7 +273,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
 
     try {
       const documento = {
-        // eliminado: true,
+        eliminado: true,
         updated_at: dateTime,
       };
 

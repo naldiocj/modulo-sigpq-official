@@ -48,6 +48,7 @@ export default class CrudBaseRepository {
 
   public async registar(input: any, file: any = null): Promise<any> {
     let pessoaIdExiste: any = null;
+    let funcionarioId: any = null;
 
     let foto_efectivo = "";
     let foto_civil = "";
@@ -449,6 +450,7 @@ export default class CrudBaseRepository {
         .insert(funcionario);
 
       funcionario.id = fc[0];
+      funcionarioId = fc[0];
 
       const passes = Array(funcionario);
 
@@ -627,7 +629,7 @@ export default class CrudBaseRepository {
       }
 
       await trx.commit();
-      return pessoaId;
+      return funcionarioId;
     } catch (e) {
       await this.#numeroAutomaticoService.gerarNumeroAutomaticoDesconto(
         "Numero_Processo_Agente"

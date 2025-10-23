@@ -6,6 +6,7 @@ import CrudBaseRepository from '../../repositories/crud-base-repositorio';
 import RedisService from 'App/@piips/shared/service/redis/RedisService';
 import Event from '@ioc:Adonis/Core/Event'
 import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
+import { E } from '@faker-js/faker/dist/airline-DF6RqYmq';
  
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 
@@ -48,7 +49,6 @@ export default class Controller implements ModuleInterfaceController {
       perPage: input.perPage,
       search: input.search,
       modulo_slug: input.modulo,
-
       regimeId: input.regimeId,
       patenteId: input.patenteId,
       tipoVinculoId: input.tipoVinculoId,
@@ -78,11 +78,16 @@ export default class Controller implements ModuleInterfaceController {
     }
 
     let result: any;
-    //this.redis.deleteAllData();
+    // this.redis.deleteAllData();
     const options_aux = funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
     const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
+
     try {
       result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
+
+      if (result === undefined || result === null || result === "undefined") {
+        result = await this.#crud.listarTodos(options_aux); 
+      }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);
     }
@@ -93,6 +98,7 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
     }
+
 
     return ok(result, null);
 
@@ -123,6 +129,7 @@ export default class Controller implements ModuleInterfaceController {
 
     const orgaoDoNovoEfectivo = request.input('orgao_id');
     const { user, orgao }: any = auth.use('jwt').payload
+
     const previlegioDoUsuariologado = user.aceder_todos_agentes ? 'all' : orgao.id;
 
     //console.log(request.all())
@@ -139,19 +146,22 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
     }
-    Event.emit('update:redis:in:dashboard',
-      {
-        orgaoNovo: orgaoDoNovoEfectivo,
-        orgaoUsuarioLogado: previlegioDoUsuariologado,
-        previlegio: previlegioDoUsuariologado
-      })
-    Event.emit('update:redis:in:search:funcionario', {
-      orgaoNovo: orgaoDoNovoEfectivo,
-      orgaoUsuarioLogado: previlegioDoUsuariologado,
-      previlegio: previlegioDoUsuariologado
-    });
-    return ok({ pessoaId: null }, 'Sucesso ao registar Efectivo!');
-    //return ok({ pessoaId: result[0] }, 'Sucesso ao registar Efectivo!');
+    // Event.emit('update:redis:in:dashboard',
+    //   {
+    //     orgaoNovo: orgaoDoNovoEfectivo,
+    //     orgaoUsuarioLogado: previlegioDoUsuariologado,
+    //     previlegio: previlegioDoUsuariologado
+    //   })
+
+    // Event.emit('update:redis:in:search:funcionario', {
+    //   orgaoNovo: orgaoDoNovoEfectivo,
+    //   orgaoUsuarioLogado: orgao.id,
+    //   previlegio: previlegioDoUsuariologado
+    // });
+
+    Event.emit('update:funcionario', result);
+    // return ok({ pessoaId: null }, 'Sucesso ao registar Efectivo!');
+    return ok({ pessoaId: result }, 'Sucesso ao registar Efectivo!');
 
   }
 
@@ -198,6 +208,7 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
     }
+
     return ok(result, null);
   }
 

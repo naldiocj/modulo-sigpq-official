@@ -35,7 +35,6 @@ const updateListagem = (dadosAntigos: any, dadosNovos: any): boolean => {
     || (dadosAntigos.sigpq_tipo_orgao.id != dadosNovos.sigpq_tipo_orgao.id)
     || (dadosAntigos.sigpq_situacao_id != dadosNovos.sigpq_situacao_id)
   )
-
 }
 const redis = new RedisService();
 const crud = new CrudBaseRepository()
