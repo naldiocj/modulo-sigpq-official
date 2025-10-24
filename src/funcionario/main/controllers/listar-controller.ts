@@ -4,7 +4,7 @@ import ListarRepository from '../../repositories/listar-repositorio';
 import RedisService from 'App/@piips/shared/service/redis/RedisService';
 import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
 import StringHelper from 'App/Helper/String';
-import Event from '@ioc:Adonis/Core/Event'
+// import Event from '@ioc:Adonis/Core/Event'
 import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
 
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')

@@ -28,4 +28,24 @@ export default class CrudBaseRepository extends BaseModuloRepository {
 
   }
 
+  public async listarPessoas(): Promise<any> {
+
+    try {
+
+      let query: DatabaseQueryBuilderContract = Database.from({ s: 'pessoas' })
+        .select('id', 'nome_completo')
+        .where('tipo', 'pf')
+        .orderBy('nome_completo', "asc")
+        .clone()
+
+      return await query
+
+
+    } catch (e) {
+      console.log(e);
+      return Error('Não foi possível listar os registos.');
+    }
+
+  }
+
 }

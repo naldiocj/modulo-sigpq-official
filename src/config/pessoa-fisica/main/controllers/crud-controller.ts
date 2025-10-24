@@ -15,5 +15,13 @@ export default class Controller {
     return ok(result, null);
 
   }
+
+  public async listarPessoas(): Promise<any> {
+
+    const result = await this.#crud.listarPessoas()
+
+    return ok(result, null);
+
+  }
  
 }

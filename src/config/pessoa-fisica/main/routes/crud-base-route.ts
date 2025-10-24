@@ -3,6 +3,11 @@ const controller = import('../controllers/crud-controller');
 export default function route(Route: any): void {
   Route.group(() => {
 
+    Route.get('/', async (): Promise<void> => {
+      const { default: Ct } = await controller
+      return new Ct().listarPessoas()
+    })
+
     Route.get('/estados', async (): Promise<void> => {
       const { default: Ct } = await controller
       return new Ct().listarEstados()

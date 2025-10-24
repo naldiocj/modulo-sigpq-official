@@ -7,6 +7,7 @@ import RedisService from 'App/@piips/shared/service/redis/RedisService';
 import Event from '@ioc:Adonis/Core/Event'
 import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
 import { E } from '@faker-js/faker/dist/airline-DF6RqYmq';
+import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
  
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 
@@ -159,7 +160,7 @@ export default class Controller implements ModuleInterfaceController {
     //   previlegio: previlegioDoUsuariologado
     // });
 
-    Event.emit('update:funcionario', result);
+    // await saveFuncionarioInRedisDB({key: funcionariokey, options});
     // return ok({ pessoaId: null }, 'Sucesso ao registar Efectivo!');
     return ok({ pessoaId: result }, 'Sucesso ao registar Efectivo!');
 
@@ -186,14 +187,15 @@ export default class Controller implements ModuleInterfaceController {
     }
 
     if (result) {
-      const agenteAtualizado = await this.#crud.listarUm(params.id);
-      Event.emit('update:redis:in:funcionario', {
-        orgaoNovo: agenteAtualizado.sigpq_tipo_orgao.id,
-        orgaoUsuarioLogado: previlegioDoUsuariologado,
-        previlegio: previlegioDoUsuariologado,
-        dadosAntigoFuncionario: agenteParaSerAtualizado,
-        dadosNovoFuncionario: agenteAtualizado,
-      })
+      // const agenteAtualizado = await this.#crud.listarUm(params.id);
+      // Event.emit('update:redis:in:funcionario', {
+      //   orgaoNovo: agenteAtualizado.sigpq_tipo_orgao.id,
+      //   orgaoUsuarioLogado: previlegioDoUsuariologado,
+      //   previlegio: previlegioDoUsuariologado,
+      //   dadosAntigoFuncionario: agenteParaSerAtualizado,
+      //   dadosNovoFuncionario: agenteAtualizado,
+      // })
+      // await saveFuncionarioInRedisDB({key: funcionariokey, options});
     }
     return ok(null, 'Sucesso ao actualizar Efectivo!');
 

@@ -50,7 +50,24 @@ export async function saveFuncionarioInRedisDB(data: any) {
     const hash = await generateCacheKey(options_aux);
     const keyStorage = `search:${name}:orgao:${key}:hash:${hash}`;
     await Event.emit("update:funcionario", { key, keyStorage, options_aux });
-    return await redisService.obterResultadoDoRedis$(keyStorage);
+    const result =  await redisService.obterResultadoDoRedis$(keyStorage);
+
+     if (result && result.data && Array.isArray(result.data) && result.data.length === 0) {
+      listRepository.listarTodos(options_aux).then(async (dados) => {
+        await redisService.storeHashField$(
+          keyStorage,
+          "results",
+          JSON.stringify(dados)
+        );
+        await redisService.storeHashField$(
+          keyStorage,
+          "filters",
+          JSON.stringify(options_aux)
+        );
+      })
+    }
+
+    return result;
   } catch (error) {
     console.log(error);
   }
