@@ -81,14 +81,14 @@ export default class Controller implements ModuleInterfaceController {
     let result: any;
     // this.redis.deleteAllData();
     const options_aux = funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
-    const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
+    // const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
 
     try {
-      result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
+      // result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
 
-      if (result === undefined || result === null || result === "undefined") {
+      // if (result === undefined || result === null || result === "undefined") {
         result = await this.#crud.listarTodos(options_aux); 
-      }
+      // }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);
     }
@@ -231,25 +231,25 @@ export default class Controller implements ModuleInterfaceController {
     }
 
     // Verifica se a eliminação foi bem-sucedida
-    if (result === 1) {
-      Event.emit('update:redis:in:dashboard', {
-        orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
-        orgaoUsuarioLogado: previlegioDoUsuariologado,
-        previlegio: previlegioDoUsuariologado,
-      });
+    // if (result === 1) {
+    //   Event.emit('update:redis:in:dashboard', {
+    //     orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
+    //     orgaoUsuarioLogado: previlegioDoUsuariologado,
+    //     previlegio: previlegioDoUsuariologado,
+    //   });
 
-      Event.emit('update:redis:in:dashboard_novo', {
-        orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
-        orgaoUsuarioLogado: previlegioDoUsuariologado,
-        previlegio: previlegioDoUsuariologado,
-      });
+    //   Event.emit('update:redis:in:dashboard_novo', {
+    //     orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
+    //     orgaoUsuarioLogado: previlegioDoUsuariologado,
+    //     previlegio: previlegioDoUsuariologado,
+    //   });
 
-      Event.emit('update:redis:in:search:funcionario', {
-        orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
-        orgaoUsuarioLogado: previlegioDoUsuariologado,
-        previlegio: previlegioDoUsuariologado
-      });
-    }
+    //   Event.emit('update:redis:in:search:funcionario', {
+    //     orgaoNovo: agenteParaSerEliminado.sigpq_tipo_orgao.id,
+    //     orgaoUsuarioLogado: previlegioDoUsuariologado,
+    //     previlegio: previlegioDoUsuariologado
+    //   });
+    // }
 
     return ok(null, 'Sucesso ao eliminar Efectivo!');
   }

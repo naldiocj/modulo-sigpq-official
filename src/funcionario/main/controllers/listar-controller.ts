@@ -5,7 +5,7 @@ import RedisService from 'App/@piips/shared/service/redis/RedisService';
 import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
 import StringHelper from 'App/Helper/String';
 // import Event from '@ioc:Adonis/Core/Event'
-import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
+// import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
 
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 
@@ -87,17 +87,17 @@ export default class Controller {
     let result: any;
 
     const options_aux = funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
-    const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
+    // const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
 
     try {
       // result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
 
       
-      result = await saveFuncionarioInRedisDB({key: funcionariokey, options});
+      // result = await saveFuncionarioInRedisDB({key: funcionariokey, options});
 
 
       // if (result === undefined || result === null || result === "undefined") {
-      //   result = await this.#crud.listarTodos(options_aux); 
+        result = await this.#crud.listarTodos(options_aux); 
       // }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);
