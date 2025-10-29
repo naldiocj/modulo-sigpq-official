@@ -39,7 +39,7 @@ Event.on("update:funcionario", async (data): Promise<any> => {
     keyStorage
   ); //aumenta as vezes de acesso
 
-  await redisService.setExpiration(keyStorage, 604800); // renova o tempo de expiração
+  await redisService.setExpiration(keyStorage, 4); // renova o tempo de expiração
 });
 
 export async function saveFuncionarioInRedisDB(data: any) {

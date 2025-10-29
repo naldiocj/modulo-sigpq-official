@@ -226,6 +226,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           "f.descricao",
           "f.pessoa_id",
           "f.funcionario_id",
+          "p.nome_completo",
           Database.raw(
             "DATE_FORMAT(f.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
           ),
@@ -233,11 +234,16 @@ export default class CrudBaseRepository extends BaseModuloRepository {
             "DATE_FORMAT(f.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
           )
         )
-        // .innerJoin(
-        //   "sigpq_funcionarios as func",
-        //   "sigpq_funcionarios.id",
-        //   "f.funcionario_id"
-        // )
+        .innerJoin(
+          "sigpq_funcionarios as func",
+          "func.id",
+          "f.funcionario_id"
+        )
+        .innerJoin(
+          "pessoas as p",
+          "p.id",
+          "f.pessoa_id"
+        )
         .where("f.eliminado", false)
         .orderBy("f.created_at", "desc")
         .where((query: any) => {
