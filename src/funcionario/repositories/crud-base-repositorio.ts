@@ -419,6 +419,7 @@ export default class CrudBaseRepository {
         id: pessoaId,
         nip: input?.nip,
         nps: input?.nps,
+        niic: input?.niic,
         numero_processo: gerarUnicoNumeroParaProcesso(numeroAutomatico),
         pseudonimo: input.pseudonimo,
         numero_agente: input?.numero_agente,
@@ -1495,6 +1496,13 @@ export default class CrudBaseRepository {
           .update({ email_servico: input.email_servico });
       }
 
+      if (input.niic) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ niic: input.niic });
+      }
+
       if (input.contacto_servico) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
@@ -2196,6 +2204,7 @@ export default class CrudBaseRepository {
           Database.raw("upper(pf.apelido) as apelido"),
           "pf.genero",
           "f.nip",
+          "f.niic",
           "f.numero_processo",
           "f.numero_agente",
           "f.foto_efectivo",
@@ -2635,6 +2644,7 @@ export default class CrudBaseRepository {
           Database.raw("upper(pf.apelido) as apelido"),
           "pf.genero",
           "f.nip",
+          "f.niic",
           "f.numero_processo",
           "f.numero_agente",
           "f.seccao",
@@ -3018,6 +3028,7 @@ export default class CrudBaseRepository {
           "estado_civils.nome as estado_civil_nome",
           "estado_civils.id as estado_civil_id",
           "f.nip",
+          "f.niic",
           "f.nps",
           "f.numero_processo",
           "f.numero_agente",
