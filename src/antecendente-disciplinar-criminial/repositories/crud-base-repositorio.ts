@@ -11,7 +11,7 @@ const {
 
 export default class CrudBaseRepository extends BaseModuloRepository {
   constructor() {
-    super("sigpq_funcionario_historico_saudes");
+    super("sigpq_antecentes_disciplinares_criminais");
   }
 
   public async registar(input: any, file: any, trxParam = null): Promise<any> {

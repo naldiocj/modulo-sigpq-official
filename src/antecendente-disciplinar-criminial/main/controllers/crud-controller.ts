@@ -21,9 +21,9 @@ export default class Controller implements ModuleInterfaceController {
       perPage: await this.validarNullOuUndefined(request, "perPage"),
       search: await this.validarNullOuUndefined(request, "search"),
       orderByAscOrDesc: request.input("orderByAscOrDesc") || "asc",
-      pessoafisica_id: await this.validarNullOuUndefined(
+      funcionario_id: await this.validarNullOuUndefined(
         request,
-        "pessoafisica_id"
+        "funcionario_id"
       ),
       activo: await this.validarNullOuUndefined(request, "activo"),
     };
