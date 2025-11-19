@@ -345,7 +345,9 @@ export default class CrudBaseRepository {
     }
 
     if (!options.orderby) {
-    } //query.orderBy('p.updated_at', 'desc')
+      //query.orderBy('p.updated_at', 'desc')
+      query.orderBy('nome_completo', 'asc')
+    } 
     else if (options.orderby == "PATENTE") query.orderBy("patentes.id", "asc");
     else if (options.orderby == "NIP") query.orderBy("f.nip", "asc");
     else if (options.orderby == "NOME") query.orderBy("nome_completo", "asc");
