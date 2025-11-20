@@ -69,16 +69,34 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
     }
-    Event.emit('update:redis:in:search:funcionario', {
-      orgaoNovo:orgaoDoNovoEfectivo,
-      orgaoUsuarioLogado:previlegioDoUsuariologado,
-      previlegio:previlegioDoUsuariologado
-    });
+    // Event.emit('update:redis:in:search:funcionario', {
+    //   orgaoNovo:orgaoDoNovoEfectivo,
+    //   orgaoUsuarioLogado:previlegioDoUsuariologado,
+    //   previlegio:previlegioDoUsuariologado
+    // });
     return ok(null, 'Sucesso ao registar mobilidade!');
   }
 
   public async editar({ params, auth, request, response }: HttpContextContract): Promise<any> {
     console.log(params, auth, request, response);
+  }
+
+   public async updateAprovaMobilidade({ params, auth, request, response }: HttpContextContract): Promise<any> {
+ 
+    const result = await this.#crud.aprovaMobilidade(params.id)
+
+    if (result instanceof Error) {
+      return response.badRequest({
+        message: result.message,
+        object: null,
+      });
+    }
+    // Event.emit('update:redis:in:search:funcionario', {
+    //   orgaoNovo:orgaoDoNovoEfectivo,
+    //   orgaoUsuarioLogado:previlegioDoUsuariologado,
+    //   previlegio:previlegioDoUsuariologado
+    // });
+    return ok(null, 'Sucesso ao aprovar a mobilidade!');
   }
 
   public async listarUm({ params, request, response }: HttpContextContract): Promise<any> {

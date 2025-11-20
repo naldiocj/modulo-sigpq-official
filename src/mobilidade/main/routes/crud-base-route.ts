@@ -30,6 +30,11 @@ export default function route(Route: any): void {
       return new Ct().eliminar(ctx)
     })
 
+    Route.put('aprovar/:id', async (ctx: any): Promise<void> => {
+      const { default: Ct } = await controller
+      return new Ct().updateAprovaMobilidade(ctx)
+    })
+
   })
 }
  

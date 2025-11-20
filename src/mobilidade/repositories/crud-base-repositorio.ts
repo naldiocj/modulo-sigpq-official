@@ -64,13 +64,13 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         // "anexo",
         "despacho",
         "data_ingresso",
-        "ordenante",
+        // "ordenante",
         // "numero_ordem",
         "pessoajuridica_passado_id",
         "departamentoPassadoId",
         "departamento_id",
-        "seccao",
-        "brigada",
+        // "seccao",
+        // "brigada",
         // "data_ordem",
         "numero_guia",
         "despacho_data",
@@ -117,7 +117,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
       if (resultadoPassaporte instanceof Error) {
         return resultadoPassaporte;
       }
-      let guiaAntiga: string = "";
+      let guiaAntiga: any = "";
 
       if (
         input.situacao == "actual" ||
@@ -152,6 +152,8 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           //   pjd_id
           // );
 
+          const guia = input.numero_guia;
+
           // if (guia instanceof Error) return Error(guia.message);
 
           delete validate["departamentoPassadoId"];
@@ -172,7 +174,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
             pessoafisica_id: agente,
             sigpq_documento_anexo_id: resultadoPassaporte[0],
 
-            // numero_guia: guia,
+            numero_guia: guia,
             nivel_colocacao: "muito-alto",
             // anexo_ordem: fileGuiaPath,
             activo: input.situacao == "anterior" ? 0 : 1,
@@ -207,29 +209,29 @@ export default class CrudBaseRepository extends BaseModuloRepository {
             created_at: this.dateTime,
             updated_at: this.dateTime,
           };
-          // if (guiaAntiga != guia) {
-          //   const cor = cores["P"].nome;
-          //   const tratamentoInput = {
-          //     cor: cor,
-          //     // numero_guia: guia,
-          //     user_id: input?.user_id,
-          //     activo: true || 1,
-          //     pessoafisica_id: pessoa_id,
-          //     created_at: this.dateTime,
-          //     updated_at: this.dateTime,
-          //   };
+          if (guiaAntiga != guia) {
+            const cor = cores["P"].nome;
+            const tratamentoInput = {
+              cor: cor,
+              numero_guia: guia,
+              user_id: input?.user_id,
+              activo: true || 1,
+              pessoafisica_id: pessoa_id,
+              created_at: this.dateTime,
+              updated_at: this.dateTime,
+            };
 
-          //   await Database.insertQuery()
-          //     .useTransaction(trx)
-          //     .table("sigpq_tratamento_mobilidades")
-          //     .insert(tratamentoInput);
-          // }
+            await Database.insertQuery()
+              .useTransaction(trx)
+              .table("sigpq_tratamento_mobilidades")
+              .insert(tratamentoInput);
+          }
 
           await Database.insertQuery()
             .useTransaction(trx)
             .table("sigpq_mais_mobilidades")
             .insert(maisMobilidade);
-          // guiaAntiga = guia;
+          guiaAntiga = guia;
 
           if (input?.departamento_id) {
             const mobilidade = {
@@ -244,7 +246,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               pessoajuridica_passado_id: dpp_id,
               pessoafisica_id: agente,
               sigpq_documento_anexo_id: resultadoPassaporte[0],
-              // numero_guia: guia,
+              numero_guia: guia,
               nivel_colocacao: "alto",
               // anexo_ordem: fileGuiaPath,
               activo: input.situacao == "anterior" ? 0 : 1,
@@ -261,7 +263,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
                 .where("pessoafisica_id", agente)
                 .where("activo", true)
                 .where("nivel_colocacao", "alto")
-                // .where('situacao', 'actual')
+                .where("situacao", "actual")
                 .where("eliminado", false)
                 .update({ activo: false, situacao: "anterior" });
             }
@@ -280,23 +282,23 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               created_at: this.dateTime,
               updated_at: this.dateTime,
             };
-            // if (guiaAntiga != guia) {
-            //   const cor = cores["P"].nome;
-            //   const tratamentoInput = {
-            //     cor: cor,
-            //     // numero_guia: guia,
-            //     user_id: input?.user_id,
-            //     activo: true || 1,
-            //     pessoafisica_id: pessoa_id,
-            //     created_at: this.dateTime,
-            //     updated_at: this.dateTime,
-            //   };
+            if (guiaAntiga != guia) {
+              const cor = cores["P"].nome;
+              const tratamentoInput = {
+                cor: cor,
+                numero_guia: guia,
+                user_id: input?.user_id,
+                activo: true || 1,
+                pessoafisica_id: pessoa_id,
+                created_at: this.dateTime,
+                updated_at: this.dateTime,
+              };
 
-            //   await Database.insertQuery()
-            //     .useTransaction(trx)
-            //     .table("sigpq_tratamento_mobilidades")
-            //     .insert(tratamentoInput);
-            // }
+              await Database.insertQuery()
+                .useTransaction(trx)
+                .table("sigpq_tratamento_mobilidades")
+                .insert(tratamentoInput);
+            }
 
             await Database.insertQuery()
               .useTransaction(trx)
@@ -318,7 +320,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               // pessoajuridica_passado_id: sc_id,
               pessoafisica_id: agente,
               sigpq_documento_anexo_id: resultadoPassaporte[0],
-              // numero_guia: guia,
+              numero_guia: guia,
               nivel_colocacao: "medio",
               // anexo_ordem: fileGuiaPath,
               activo: input.situacao == "anterior" ? 0 : 1,
@@ -335,7 +337,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
                 .where("pessoafisica_id", agente)
                 .where("activo", true)
                 .where("nivel_colocacao", "medio")
-                // .where('situacao', 'actual')
+                .where("situacao", "actual")
                 .where("eliminado", false)
                 .update({ activo: false, situacao: "anterior" });
             }
@@ -354,29 +356,29 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               created_at: this.dateTime,
               updated_at: this.dateTime,
             };
-            // if (guiaAntiga != guia) {
-            //   const cor = cores["P"].nome;
-            //   const tratamentoInput = {
-            //     cor: cor,
-            //     numero_guia: guia,
-            //     user_id: input?.user_id,
-            //     activo: true || 1,
-            //     pessoafisica_id: pessoa_id,
-            //     created_at: this.dateTime,
-            //     updated_at: this.dateTime,
-            //   };
+            if (guiaAntiga != guia) {
+              const cor = cores["P"].nome;
+              const tratamentoInput = {
+                cor: cor,
+                numero_guia: guia,
+                user_id: input?.user_id,
+                activo: true || 1,
+                pessoafisica_id: pessoa_id,
+                created_at: this.dateTime,
+                updated_at: this.dateTime,
+              };
 
-            //   await Database.insertQuery()
-            //     .useTransaction(trx)
-            //     .table("sigpq_tratamento_mobilidades")
-            //     .insert(tratamentoInput);
-            // }
+              await Database.insertQuery()
+                .useTransaction(trx)
+                .table("sigpq_tratamento_mobilidades")
+                .insert(tratamentoInput);
+            }
 
             await Database.insertQuery()
               .useTransaction(trx)
               .table("sigpq_mais_mobilidades")
               .insert(maisMobilidade);
-            // guiaAntiga = guia;
+            guiaAntiga = guia;
           }
           if (input?.posto_id) {
             const mobilidade = {
@@ -391,7 +393,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               pessoajuridica_passado_id: posto_id,
               pessoafisica_id: agente,
               sigpq_documento_anexo_id: resultadoPassaporte[0],
-              // numero_guia: guia,
+              numero_guia: guia,
               nivel_colocacao: "baixo",
               // anexo_ordem: fileGuiaPath,
               activo: input.situacao == "anterior" ? 0 : 1,
@@ -408,7 +410,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
                 .where("pessoafisica_id", agente)
                 .where("activo", true)
                 .where("nivel_colocacao", "baixo")
-                // .where('situacao', 'actual')
+                .where("situacao", "actual")
                 .where("eliminado", false)
                 .update({ activo: false, situacao: "anterior" });
             }
@@ -427,29 +429,29 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               created_at: this.dateTime,
               updated_at: this.dateTime,
             };
-            // if (guiaAntiga != guia) {
-            //   const cor = cores["P"].nome;
-            //   const tratamentoInput = {
-            //     cor: cor,
-            //     numero_guia: guia,
-            //     user_id: input?.user_id,
-            //     activo: true || 1,
-            //     pessoafisica_id: pessoa_id,
-            //     created_at: this.dateTime,
-            //     updated_at: this.dateTime,
-            //   };
+            if (guiaAntiga != guia) {
+              const cor = cores["P"].nome;
+              const tratamentoInput = {
+                cor: cor,
+                numero_guia: guia,
+                user_id: input?.user_id,
+                activo: true || 1,
+                pessoafisica_id: pessoa_id,
+                created_at: this.dateTime,
+                updated_at: this.dateTime,
+              };
 
-            //   await Database.insertQuery()
-            //     .useTransaction(trx)
-            //     .table("sigpq_tratamento_mobilidades")
-            //     .insert(tratamentoInput);
-            // }
+              await Database.insertQuery()
+                .useTransaction(trx)
+                .table("sigpq_tratamento_mobilidades")
+                .insert(tratamentoInput);
+            }
 
             await Database.insertQuery()
               .useTransaction(trx)
               .table("sigpq_mais_mobilidades")
               .insert(maisMobilidade);
-            // guiaAntiga = guia;
+            guiaAntiga = guia;
           }
         }
       }
@@ -505,6 +507,31 @@ export default class CrudBaseRepository extends BaseModuloRepository {
       console.log(e);
       return Error("Não foi possível atualizar Provimento.");
     }
+  }
+
+  public async aprovaMobilidade( id: any, trxParam = null
+  ): Promise<any> {
+
+    console.log(id)
+    const trx = trxParam ? trxParam : await Database.transaction();
+
+    const guiaFinded = await Database.from({ fo: "sigpq_tratamento_mobilidades" })
+    .where("numero_guia", id)
+    .first();
+
+    if (!guiaFinded) { 
+      return Error("Guia não encontrada.");
+    } 
+
+    const cor = cores["P"].nome;
+    const tratamentoInput = {
+      cor: cor,
+    };
+
+    await Database.from("sigpq_tratamento_mobilidades")
+      .useTransaction(trx)
+      .where("numero_guia", id)
+      .update(tratamentoInput)
   }
 
   public async editar(input: any, id: any, trxParam = null): Promise<any> {
@@ -1230,10 +1257,10 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     if (!orgao) return Error("Não foi possível gerar guia");
 
     const siglaOgao = orgaoPassado
-      ? this.getSiglaPNA(orgaoPassado?.sigla) +
+      ? this.getSiglaSIC(orgaoPassado?.sigla) +
         "/" +
-        this.getSiglaPNA(orgao?.sigla)
-      : this.getSiglaPNA(orgao?.sigla);
+        this.getSiglaSIC(orgao?.sigla)
+      : this.getSiglaSIC(orgao?.sigla);
     const guia = `${this.numeroAutomatico + 1}/${siglaOgao}/${anoGuia}`;
 
     if (await this.buscarNumeroGuia(guia, pessoajuridicaId)) {
@@ -1256,12 +1283,14 @@ export default class CrudBaseRepository extends BaseModuloRepository {
       : null;
   }
 
-  public getSiglaPNA(sigla: any) {
-    return `${sigla}-PNA`;
+  public getSiglaSIC(sigla: any) {
+    return `${sigla}-SIC`;
   }
 
   public async gerarNumeroOutro() {
     this.numeroAutomatico =
       await this.#numeroAutomaticoService.gerarNumeroAutomatico("Numero_guia");
   }
+
+  
 }
