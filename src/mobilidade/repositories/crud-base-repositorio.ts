@@ -509,29 +509,35 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     }
   }
 
-  public async aprovaMobilidade( id: any, trxParam = null
-  ): Promise<any> {
-
-    console.log(id)
+  public async aprovaMobilidade(id: any, trxParam = null): Promise<any> {
     const trx = trxParam ? trxParam : await Database.transaction();
+    try {
+      const guiaFinded = await Database.from({
+        fo: "sigpq_tratamento_mobilidades",
+      })
+        .where("numero_guia", id)
+        .first();
 
-    const guiaFinded = await Database.from({ fo: "sigpq_tratamento_mobilidades" })
-    .where("numero_guia", id)
-    .first();
+      if (!guiaFinded) {
+        return Error("Guia não encontrada.");
+      }
 
-    if (!guiaFinded) { 
-      return Error("Guia não encontrada.");
-    } 
+      const cor = cores["V"].nome;
+      const tratamentoInput = {
+        cor: cor,
+      };
 
-    const cor = cores["P"].nome;
-    const tratamentoInput = {
-      cor: cor,
-    };
+      await Database.from("sigpq_tratamento_mobilidades")
+        .useTransaction(trx)
+        .where("numero_guia", id)
+        .update(tratamentoInput);
 
-    await Database.from("sigpq_tratamento_mobilidades")
-      .useTransaction(trx)
-      .where("numero_guia", id)
-      .update(tratamentoInput)
+      return trxParam ? trxParam : await trx.commit();
+    } catch (e) {
+      trxParam ? trxParam : await trx.rollback();
+      console.log(e);
+      throw new Error("Não foi possível criar um novo registo.");
+    }
   }
 
   public async editar(input: any, id: any, trxParam = null): Promise<any> {
@@ -1291,6 +1297,4 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     this.numeroAutomatico =
       await this.#numeroAutomaticoService.gerarNumeroAutomatico("Numero_guia");
   }
-
-  
 }
