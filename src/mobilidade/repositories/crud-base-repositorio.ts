@@ -59,22 +59,22 @@ export default class CrudBaseRepository extends BaseModuloRepository {
       const camposDesejados: (keyof any)[] = [
         "orgao_destino_id",
         "direccao_destino_id",
+        "departamento_id",
         "user_id",
         "agentes_id",
-        // "anexo",
         "despacho",
         "data_ingresso",
-        // "ordenante",
-        // "numero_ordem",
-        "pessoajuridica_passado_id",
-        "departamentoPassadoId",
-        "departamento_id",
-        // "seccao",
-        // "brigada",
-        // "data_ordem",
         "numero_guia",
         "despacho_data",
         "situacao",
+        // "ordenante",
+        // "numero_ordem",
+        // "anexo",
+        // "pessoajuridica_passado_id", // AQUI
+        // "departamentoPassadoId", // AQUI
+        // "seccao",
+        // "brigada",
+        // "data_ordem",
       ];
 
       const camposOpcionais: (keyof any)[] = ["observacao"];
@@ -124,15 +124,13 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         input.situacao == "anterior" // && agentes?.length > 0
       ) {
         for (const agente of agentes) {
+
+          // busca last sigpq_funcionario_orgaos where pessoafisica_id = agente and activo = true order by created_at desc limit 1
           const pjp: any = await this.buscarOrgaoAnterior(agente, "muito-alto");
-          const pjd_id = input?.pessoajuridica_passado_id
-            ? input?.pessoajuridica_passado_id
-            : pjp?.pessoajudidica_id_passado;
+          const pjd_id = pjp?.pessoajudidica_id_passado;
 
           const dp: any = await this.buscarOrgaoAnterior(agente, "alto");
-          const dpp_id = input?.departamentoPassadoId
-            ? input?.departamentoPassadoId
-            : dp?.pessoajudidica_id_passado;
+          const dpp_id = dp?.pessoajudidica_id_passado;
 
           // const ud: any = await this.buscarOrgaoAnterior(agente, 'moderado')
           // const udp_id = input?.unidadePassadoId ? input?.unidadePassadoId : ud?.pessoajudidica_id_passado
@@ -142,17 +140,15 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           //   ? input?.seccaoPassadoId
           //   : sc?.pessoajudidica_id_passado;
 
-          const posto: any = await this.buscarOrgaoAnterior(agente, "baixo");
-          const posto_id = input?.postoPassadoId
-            ? input?.postoPassadoId
-            : posto?.pessoajudidica_id_passado;
+          // const posto: any = await this.buscarOrgaoAnterior(agente, "baixo");
+          // const posto_id = posto?.pessoajudidica_id_passado;
 
-          // const guia = await this.getNumeroGuia(
-          //   input.pessoajuridica_id,
-          //   pjd_id
-          // );
+          const guia = await this.getNumeroGuia(
+            input.direccao_destino_id,
+            pjd_id
+          );
 
-          const guia = input.numero_guia;
+          // const guia = input.numero_guia;
 
           // if (guia instanceof Error) return Error(guia.message);
 
@@ -202,7 +198,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
             .insert(mobilidade);
 
           const maisMobilidade = {
-            ordenante: input?.ordenante,
+            ordenante: input?.ordenante ?? "-",
             sigpq_fun_id: mobilidadeId[0],
             pessoafisica_id: pessoa_id,
             user_id: input?.user_id,
@@ -275,7 +271,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               .insert(mobilidade);
 
             const maisMobilidade = {
-              ordenante: input?.ordenante,
+              ordenante: input?.ordenante ?? "-",
               sigpq_fun_id: mobilidadeId[0],
               pessoafisica_id: pessoa_id,
               user_id: input?.user_id,
@@ -349,7 +345,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               .insert(mobilidade);
 
             const maisMobilidade = {
-              ordenante: input?.ordenante,
+              ordenante: input?.ordenante ?? "-",
               sigpq_fun_id: mobilidadeId[0],
               pessoafisica_id: pessoa_id,
               user_id: input?.user_id,
@@ -380,79 +376,79 @@ export default class CrudBaseRepository extends BaseModuloRepository {
               .insert(maisMobilidade);
             guiaAntiga = guia;
           }
-          if (input?.posto_id) {
-            const mobilidade = {
-              ...validate,
-              pessoajuridica_id: input?.posto_id,
-              // ordem_data: input?.data_ordem,
-              // ordem_descricao: extensao_ordem(input?.data_ordem, input?.numero_ordem),
-              despacho_descricao: input?.despacho
-                ? extensao_despacho(input?.despacho_data, input?.despacho)
-                : null,
-              despacho_data: input?.despacho_data,
-              pessoajuridica_passado_id: posto_id,
-              pessoafisica_id: agente,
-              sigpq_documento_anexo_id: resultadoPassaporte[0],
-              numero_guia: guia,
-              nivel_colocacao: "baixo",
-              // anexo_ordem: fileGuiaPath,
-              activo: input.situacao == "anterior" ? 0 : 1,
-              created_at: this.dateTime,
-              updated_at: this.dateTime,
-            };
+          // if (input?.posto_id) {
+          //   const mobilidade = {
+          //     ...validate,
+          //     pessoajuridica_id: input?.posto_id,
+          //     // ordem_data: input?.data_ordem,
+          //     // ordem_descricao: extensao_ordem(input?.data_ordem, input?.numero_ordem),
+          //     despacho_descricao: input?.despacho
+          //       ? extensao_despacho(input?.despacho_data, input?.despacho)
+          //       : null,
+          //     despacho_data: input?.despacho_data,
+          //     pessoajuridica_passado_id: posto_id,
+          //     pessoafisica_id: agente,
+          //     sigpq_documento_anexo_id: resultadoPassaporte[0],
+          //     numero_guia: guia,
+          //     nivel_colocacao: "baixo",
+          //     // anexo_ordem: fileGuiaPath,
+          //     activo: input.situacao == "anterior" ? 0 : 1,
+          //     created_at: this.dateTime,
+          //     updated_at: this.dateTime,
+          //   };
 
-            delete mobilidade["agentes_id"];
-            delete mobilidade["pessoajuridica_id"];
-            delete mobilidade["ordenante"];
-            if (this.isActual(input?.situacao)) {
-              await Database.from("sigpq_funcionario_orgaos")
-                .useTransaction(trx)
-                .where("pessoafisica_id", agente)
-                .where("activo", true)
-                .where("nivel_colocacao", "baixo")
-                .where("situacao", "actual")
-                .where("eliminado", false)
-                .update({ activo: false, situacao: "anterior" });
-            }
+          //   delete mobilidade["agentes_id"];
+          //   delete mobilidade["pessoajuridica_id"];
+          //   delete mobilidade["ordenante"];
+          //   if (this.isActual(input?.situacao)) {
+          //     await Database.from("sigpq_funcionario_orgaos")
+          //       .useTransaction(trx)
+          //       .where("pessoafisica_id", agente)
+          //       .where("activo", true)
+          //       .where("nivel_colocacao", "baixo")
+          //       .where("situacao", "actual")
+          //       .where("eliminado", false)
+          //       .update({ activo: false, situacao: "anterior" });
+          //   }
 
-            const mobilidadeId = await Database.table(
-              "sigpq_funcionario_orgaos"
-            )
-              .useTransaction(trx)
-              .insert(mobilidade);
+          //   const mobilidadeId = await Database.table(
+          //     "sigpq_funcionario_orgaos"
+          //   )
+          //     .useTransaction(trx)
+          //     .insert(mobilidade);
 
-            const maisMobilidade = {
-              ordenante: input?.ordenante,
-              sigpq_fun_id: mobilidadeId[0],
-              pessoafisica_id: pessoa_id,
-              user_id: input?.user_id,
-              created_at: this.dateTime,
-              updated_at: this.dateTime,
-            };
-            if (guiaAntiga != guia) {
-              const cor = cores["P"].nome;
-              const tratamentoInput = {
-                cor: cor,
-                numero_guia: guia,
-                user_id: input?.user_id,
-                activo: true || 1,
-                pessoafisica_id: pessoa_id,
-                created_at: this.dateTime,
-                updated_at: this.dateTime,
-              };
+          //   const maisMobilidade = {
+          //     ordenante: input?.ordenante,
+          //     sigpq_fun_id: mobilidadeId[0],
+          //     pessoafisica_id: pessoa_id,
+          //     user_id: input?.user_id,
+          //     created_at: this.dateTime,
+          //     updated_at: this.dateTime,
+          //   };
+          //   if (guiaAntiga != guia) {
+          //     const cor = cores["P"].nome;
+          //     const tratamentoInput = {
+          //       cor: cor,
+          //       numero_guia: guia,
+          //       user_id: input?.user_id,
+          //       activo: true || 1,
+          //       pessoafisica_id: pessoa_id,
+          //       created_at: this.dateTime,
+          //       updated_at: this.dateTime,
+          //     };
 
-              await Database.insertQuery()
-                .useTransaction(trx)
-                .table("sigpq_tratamento_mobilidades")
-                .insert(tratamentoInput);
-            }
+          //     await Database.insertQuery()
+          //       .useTransaction(trx)
+          //       .table("sigpq_tratamento_mobilidades")
+          //       .insert(tratamentoInput);
+          //   }
 
-            await Database.insertQuery()
-              .useTransaction(trx)
-              .table("sigpq_mais_mobilidades")
-              .insert(maisMobilidade);
-            guiaAntiga = guia;
-          }
+          //   await Database.insertQuery()
+          //     .useTransaction(trx)
+          //     .table("sigpq_mais_mobilidades")
+          //     .insert(maisMobilidade);
+          //   guiaAntiga = guia;
+          // }
         }
       }
       return trxParam ? trxParam : await trx.commit();

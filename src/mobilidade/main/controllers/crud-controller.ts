@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ModuleInterfaceController from 'App/Repositories/modulo/ModuleInterfaceController';
-import Event from '@ioc:Adonis/Core/Event'
 import CrudBaseRepositorios from '../../repositories/crud-base-repositorio';
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 

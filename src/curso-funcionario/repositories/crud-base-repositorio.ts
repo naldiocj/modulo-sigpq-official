@@ -214,9 +214,9 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           "tc.nome",
           "c.activo",
           "tc.id as sigpq_tipo_curso_id",
-          "sigpq_tipo_formacao.id as tipo_id",
-          "sigpq_tipo_formacao.nome as tipo",
-          "sigpq_tipo_formacao.sigla as tipo_sigla",
+          // "sigpq_tipo_formacao.id as tipo_id",
+          "sigpq_tipo_cursos.tipo as tipo",
+          "sigpq_tipo_cursos.sigla as tipo_sigla",
           Database.raw(
             "DATE_FORMAT(c.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
           ),
@@ -226,9 +226,9 @@ export default class CrudBaseRepository extends BaseModuloRepository {
         )
         .leftJoin("sigpq_tipo_cursos as tc", "tc.id", "c.sigpq_tipo_curso_id")
         .leftJoin(
-          "sigpq_tipo_formacao",
-          "sigpq_tipo_formacao.id",
-          "tc.tipo_formacao_id"
+          "sigpq_tipo_cursos",
+          "sigpq_tipo_cursos.id",
+          "tc.id"
         )
         .leftJoin(
           "sigpq_instituicao_de_ensino",

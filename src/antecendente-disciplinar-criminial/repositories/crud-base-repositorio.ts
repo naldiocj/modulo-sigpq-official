@@ -226,7 +226,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
           "f.descricao",
           "f.pessoa_id",
           "f.funcionario_id",
-          "p.nome_completo",
+          "p.nome_completo as instrutor",
           Database.raw(
             "DATE_FORMAT(f.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
           ),

@@ -291,17 +291,17 @@ export default class CrudBaseRepository {
         .where('p.eliminado', false)
         .where('pj.eliminado', false)
         .orderBy('p.nome_completo')
-        .where(query => {
-          if (options.pessoafisica) {
-            query.where('pj.pessoajuridica_id', options.pessoafisica)
-            // query.whereIn('tpj.nome', ['Departamento', 'Comando Municipal', 'Unidade'])
-            query.whereIn('tpj.nome', ['Departamento', 'Comando Municipal', 'Unidade', 'Secção', 'Esquadra', 'Subunidade'])
-          } else if (options.pessoajuridica_id) {
-            query.where('pj.id', options.pessoajuridica_id)
-          } else {
-            query.where('tpj.nome', 'Direção ou Orgão')
-          }
-        })
+        // .where(query => {
+        //   if (options.pessoafisica) {
+        //     query.where('pj.pessoajuridica_id', options.pessoafisica)
+        //     // query.whereIn('tpj.nome', ['Departamento', 'Comando Municipal', 'Unidade'])
+        //     // query.whereIn('tpj.nome', ['Departamento', 'Comando Municipal', 'Unidade', 'Secção', 'Esquadra', 'Subunidade'])
+        //   } else if (options.pessoajuridica_id) {
+        //     query.where('pj.id', options.pessoajuridica_id)
+        //   } else {
+        //     query.where('tpj.nome', 'Órgão')
+        //   }
+        // })
 
 
         .where(function (item: any): void {
@@ -322,6 +322,8 @@ export default class CrudBaseRepository {
       }
       if (options.tipo_orgao) {
         query.where('pj.orgao_comando_provincial', options.tipo_orgao)
+      } else {
+        query.where('pj.orgao_comando_provincial', 'Órgão')
       }
       if (options.tipo_estrutura_sigla) {
         query.where('pj.tipo_estrutura_organica_sigla', options.tipo_estrutura_sigla)
