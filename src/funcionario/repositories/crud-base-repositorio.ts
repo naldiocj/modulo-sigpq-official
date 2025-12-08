@@ -441,6 +441,7 @@ export default class CrudBaseRepository {
         data_adesao: input.data_adesao,
         descricao: input.descricao,
         tipo_estrutura_organica_id: input?.tipo_orgao ?? null,
+        orgao_proveniencia: input?.orgao_proveniencia,
         created_at: this.dateTime,
         updated_at: this.dateTime,
       };
@@ -1489,28 +1490,35 @@ export default class CrudBaseRepository {
         .where("id", id)
         .update(funcionario);
 
-      if (input.email_servico) {
+      if (input?.email_servico) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
           .update({ email_servico: input.email_servico });
       }
 
-      if (input.niic) {
+      if (input?.niic) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
           .update({ niic: input.niic });
       }
 
-      if (input.contacto_servico) {
+      if (input?.contacto_servico) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
           .update({ contacto_servico: input.contacto_servico });
       }
 
-      if (input.seccao) {
+      if (input?.orgao_proveniencia) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ orgao_proveniencia: input.orgao_proveniencia });
+      }
+
+      if (input?.seccao) {
         await Database.from("sigpq_funcionarios")
           .useTransaction(trx)
           .where("id", id)
@@ -3033,6 +3041,7 @@ export default class CrudBaseRepository {
           "f.numero_processo",
           "f.numero_agente",
           "f.foto_efectivo",
+          "f.orgao_proveniencia",
           "f.descricao",
           "f.pseudonimo",
           "f.id",
