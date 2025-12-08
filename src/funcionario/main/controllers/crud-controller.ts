@@ -1,50 +1,54 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
-import ModuleInterfaceController from 'App/Repositories/modulo/ModuleInterfaceController';
+import ModuleInterfaceController from "App/Repositories/modulo/ModuleInterfaceController";
 
-import CrudBaseRepository from '../../repositories/crud-base-repositorio';
-import RedisService from 'App/@piips/shared/service/redis/RedisService';
-import Event from '@ioc:Adonis/Core/Event'
-import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../../../../@core/helpers/funcoesCompartilhadas';
-import { E } from '@faker-js/faker/dist/airline-DF6RqYmq';
-import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
- 
-const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
+import CrudBaseRepository from "../../repositories/crud-base-repositorio";
+import RedisService from "App/@piips/shared/service/redis/RedisService";
+import Event from "@ioc:Adonis/Core/Event";
+import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from "../../../../@core/helpers/funcoesCompartilhadas";
 
-const { ok } = require('App/Helper/Http-helper')
- 
+import Logger from "@ioc:WinstonLogger";
+import { getLogFormated } from "Config/constants";
+
+const removeTextNullVariable = require("App/@piips/shared/metodo-generico/RemoveTextNullVariable");
+
+const { ok } = require("App/Helper/Http-helper");
+
 export default class Controller implements ModuleInterfaceController {
-  #crud
+  #crud;
   redis = new RedisService();
   constructor() {
-    this.#crud = new CrudBaseRepository()
+    this.#crud = new CrudBaseRepository();
   }
 
-  public async listarTodos({ auth, request, response }: HttpContextContract): Promise<any> {
-
-    const { user, orgao }: any = auth.use('jwt').payload
+  public async listarTodos({
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const { user, orgao }: any = auth.use("jwt").payload;
 
     if (!user) {
       return response.badRequest({
-        message: 'Utilizador não está logado',
+        message: "Utilizador não está logado",
         object: null,
       });
     }
 
     if (!orgao) {
       return response.badRequest({
-        message: 'Este utilizador não está associado a um orgão',
+        message: "Este utilizador não está associado a um orgão",
         object: null,
       });
     }
 
     const input = removeTextNullVariable({
       ...request.all(),
-      user_id: auth.user?.id
-    })
+      user_id: auth.user?.id,
+    });
 
     console.log(input);
-    
+
     const options = {
       page: input.page,
       perPage: input.perPage,
@@ -69,25 +73,27 @@ export default class Controller implements ModuleInterfaceController {
       aceder_posto_policial: user.aceder_posto_policial,
       dashboard: Boolean(input.dashboard),
       patenteClasse: input.patenteClasse,
-      orderByAscOrDesc: input.orderByAscOrDesc || 'asc',
+      orderByAscOrDesc: input.orderByAscOrDesc || "asc",
       forcaPassiva: input.forcaPassiva,
       sigpq_estado_reforma_id: input.sigpq_estado_reforma_id,
       sigpq_excluir_estado_reforma_id: input.sigpq_excluir_estado_reforma_id,
       orderby: input.orderby,
       funcao_id: input.funcao_id,
-      excluir_efectividade_e_inactividade: input.excluir_efectividade_e_inactividade
-    }
+      excluir_efectividade_e_inactividade:
+        input.excluir_efectividade_e_inactividade,
+    };
 
     let result: any;
     // this.redis.deleteAllData();
-    const options_aux = funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
+    const options_aux =
+      funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
     // const funcionariokey = user.aceder_todos_agentes ? 'all' : orgao.id;
 
     try {
       // result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
 
       // if (result === undefined || result === null || result === "undefined") {
-        result = await this.#crud.listarTodos(options_aux); 
+      result = await this.#crud.listarTodos(options_aux);
       // }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);
@@ -100,9 +106,14 @@ export default class Controller implements ModuleInterfaceController {
       });
     }
 
+    const clientIp = request.ip();
+
+    Logger.info(getLogFormated(user, "a listagem", "de funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
 
     return ok(result, null);
-
   }
 
   /*  async verificarSeExisteEArmazenaNoRedis(name: string, key: string, options: any, repository: any) {
@@ -124,22 +135,25 @@ export default class Controller implements ModuleInterfaceController {
      return result;
    } */
 
+  public async registar({
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const orgaoDoNovoEfectivo = request.input("orgao_id");
+    const { user, orgao }: any = auth.use("jwt").payload;
 
-
-  public async registar({ auth, request, response }: HttpContextContract): Promise<any> {
-
-    const orgaoDoNovoEfectivo = request.input('orgao_id');
-    const { user, orgao }: any = auth.use('jwt').payload
-
-    const previlegioDoUsuariologado = user.aceder_todos_agentes ? 'all' : orgao.id;
+    const previlegioDoUsuariologado = user.aceder_todos_agentes
+      ? "all"
+      : orgao.id;
 
     //console.log(request.all())
     const input = removeTextNullVariable({
       ...request.all(),
-      user_id: auth.user?.id
-    })
+      user_id: auth.user?.id,
+    });
 
-    const result = await this.#crud.registar(input, request)
+    const result = await this.#crud.registar(input, request);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -162,22 +176,34 @@ export default class Controller implements ModuleInterfaceController {
 
     // await saveFuncionarioInRedisDB({key: funcionariokey, options});
     // return ok({ pessoaId: null }, 'Sucesso ao registar Efectivo!');
-    return ok({ pessoaId: result }, 'Sucesso ao registar Efectivo!');
+    const clientIp = request.ip();
 
+    Logger.info(getLogFormated(user, "registar", "funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
+    return ok({ pessoaId: result }, "Sucesso ao registar Efectivo!");
   }
 
-  public async editar({ params, auth, request, response }: HttpContextContract): Promise<any> {
-
+  public async editar({
+    params,
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     const input = removeTextNullVariable({
       ...request.all(),
-      user_id: auth.user?.id
-    })
+      user_id: auth.user?.id,
+    });
 
-    const { user, orgao }: any = auth.use('jwt').payload
-    const previlegioDoUsuariologado = user.aceder_todos_agentes ? 'all' : orgao.id;
+    const { user, orgao }: any = auth.use("jwt").payload;
+    const previlegioDoUsuariologado = user.aceder_todos_agentes
+      ? "all"
+      : orgao.id;
     const agenteParaSerAtualizado = await this.#crud.listarUm(params.id);
 
-    const result = await this.#crud.editar(input, request, params.id)
+    const result = await this.#crud.editar(input, request, params.id);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -197,12 +223,24 @@ export default class Controller implements ModuleInterfaceController {
       // })
       // await saveFuncionarioInRedisDB({key: funcionariokey, options});
     }
-    return ok(null, 'Sucesso ao actualizar Efectivo!');
 
+    const clientIp = request.ip();
+
+    Logger.info(getLogFormated(user, "editar", "funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
+    return ok(null, "Sucesso ao actualizar Efectivo!");
   }
 
-  public async listarUm({ params, response }: HttpContextContract): Promise<any> {
-    const result = await this.#crud.listarUm(params.id)
+  public async listarUm({
+    params,
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const result = await this.#crud.listarUm(params.id);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -211,14 +249,29 @@ export default class Controller implements ModuleInterfaceController {
       });
     }
 
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(getLogFormated(user, "lista um", "funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
     return ok(result, null);
   }
 
-  public async eliminar({ auth, params, request, response }: HttpContextContract): Promise<any> {
-
-    const { id } = params
-    const { user, orgao }: any = auth.use('jwt').payload
-    const previlegioDoUsuariologado = user.aceder_todos_agentes ? 'all' : orgao.id;
+  public async eliminar({
+    auth,
+    params,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const { id } = params;
+    const { user, orgao }: any = auth.use("jwt").payload;
+    const previlegioDoUsuariologado = user.aceder_todos_agentes
+      ? "all"
+      : orgao.id;
 
     const agenteParaSerEliminado = await this.#crud.listarUm(id);
     const result = await this.#crud.eliminar(id);
@@ -251,24 +304,37 @@ export default class Controller implements ModuleInterfaceController {
     //   });
     // }
 
-    return ok(null, 'Sucesso ao eliminar Efectivo!');
+    const clientIp = request.ip();
+
+    Logger.info(getLogFormated(user, "eliminar", "funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
+    return ok(null, "Sucesso ao eliminar Efectivo!");
   }
 
   async validarNullOuUndefined(request: any, field: any) {
-    return ['null', undefined].includes(request.input(field)) ? null : request.input(field);
+    return ["null", undefined].includes(request.input(field))
+      ? null
+      : request.input(field);
   }
 
-  public async editarFoto({ auth, params, request, response }: HttpContextContract): Promise<any> {
-
-    const { id } = params
+  public async editarFoto({
+    auth,
+    params,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const { id } = params;
 
     const input = {
-      foto_efectivo: request.file('foto_efectivo'),
-      foto_civil: request.file('foto_civil'),
-      user_id: auth.user?.id
-    }
+      foto_efectivo: request.file("foto_efectivo"),
+      foto_civil: request.file("foto_civil"),
+      user_id: auth.user?.id,
+    };
 
-    const result = await this.#crud.alterarFoto(Number(id), input)
+    const result = await this.#crud.alterarFoto(Number(id), input);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -277,26 +343,31 @@ export default class Controller implements ModuleInterfaceController {
       });
     }
 
-    return ok(null, 'Sucesso ao alterar a foto do agente!');
-
+    return ok(null, "Sucesso ao alterar a foto do agente!");
   }
 
-  public async editarStado({ auth, params, request, response }: HttpContextContract): Promise<any> {
-    const { id } = params
-
+  public async editarStado({
+    auth,
+    params,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const { id } = params;
 
     const input = removeTextNullVariable({
       ...request.all(),
-      user_id: auth.user?.id
-    })
-    const result = await this.#crud.editarStado(Number(id), input)
-    const { user, orgao }: any = auth.use('jwt').payload
-    const previlegioDoUsuariologado = user.aceder_todos_agentes ? 'all' : orgao.id;
+      user_id: auth.user?.id,
+    });
+    const result = await this.#crud.editarStado(Number(id), input);
+    const { user, orgao }: any = auth.use("jwt").payload;
+    const previlegioDoUsuariologado = user.aceder_todos_agentes
+      ? "all"
+      : orgao.id;
 
-    Event.emit('update:redis:in:search:funcionario', {
+    Event.emit("update:redis:in:search:funcionario", {
       orgaoNovo: orgao.id,
       orgaoUsuarioLogado: previlegioDoUsuariologado,
-      previlegio: previlegioDoUsuariologado
+      previlegio: previlegioDoUsuariologado,
     });
 
     if (result instanceof Error) {
@@ -306,7 +377,13 @@ export default class Controller implements ModuleInterfaceController {
       });
     }
 
-    return ok(null, 'Sucesso ao alterar o estado do agente!');
+    const clientIp = request.ip();
 
+    Logger.info(getLogFormated(user, "editar estado", "funcionários"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
+    return ok(null, "Sucesso ao alterar o estado do agente!");
   }
 }

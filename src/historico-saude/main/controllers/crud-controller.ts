@@ -3,6 +3,8 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ModuleInterfaceController from "App/Repositories/modulo/ModuleInterfaceController";
 
 import CrudBaseRepository from "../../repositories/crud-base-repositorio";
+import Logger from "Config/winston";
+import { getLogFormated } from "Config/constants";
 
 const { ok } = require("App/Helper/Http-helper");
 
@@ -15,6 +17,7 @@ export default class Controller implements ModuleInterfaceController {
   public async listarTodos({
     request,
     response,
+    auth,
   }: HttpContextContract): Promise<any> {
     const options = {
       page: await this.validarNullOuUndefined(request, "page"),
@@ -35,6 +38,15 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
     }
+
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(getLogFormated(user, "listar todos", "histórico de saúde"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
 
     return ok(result, null);
   }
@@ -91,6 +103,15 @@ export default class Controller implements ModuleInterfaceController {
       // });
     }
 
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(getLogFormated(user, "listar todos", "históricos de saúde"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
+
     return ok(null, "Sucesso ao registar historico de saude!");
   }
 
@@ -123,6 +144,15 @@ export default class Controller implements ModuleInterfaceController {
       //   message: "Utilizador registado com sucesso!",
       // });
     }
+
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(getLogFormated(user, "listar todos", "históricos de saúde"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
 
     return ok(null, "Sucesso ao editar historico de saude!!");
   }

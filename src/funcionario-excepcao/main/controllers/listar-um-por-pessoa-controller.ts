@@ -1,5 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ListarPorPessoaRepository from "../../repositories/listar-por-pessoa-repository";
+import Logger from "Config/winston";
+import { getLogFormated } from "Config/constants";
 
 const { ok } = require("App/Helper/Http-helper");
 
@@ -12,6 +14,8 @@ export default class Controller {
   public async execute({
     params,
     response,
+    request,
+    auth,
   }: HttpContextContract): Promise<any> {
     const { pessoa_id } = params;
     const result = await this.#repo.execute(pessoa_id, false);
@@ -22,6 +26,15 @@ export default class Controller {
         object: null,
       });
     }
+
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(getLogFormated(user, "listar um por pessoa", "funcionários em excepção"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
 
     return ok(result, null);
   }

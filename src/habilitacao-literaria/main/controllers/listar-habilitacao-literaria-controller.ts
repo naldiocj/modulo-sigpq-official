@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ListarhabilitacaoLiterariaRepositorio from '../../repositories/listar-habilitacao-literaria-repositorio'
+import Logger from 'Config/winston';
+import { getLogFormated } from 'Config/constants';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -11,7 +13,7 @@ export default class RegistarHabilitacaoLiterariaController {
     this.#repo = new ListarhabilitacaoLiterariaRepositorio()
   }
 
-  public async execute({ request }: HttpContextContract): Promise<any> {
+  public async execute({ request, auth }: HttpContextContract): Promise<any> {
 
     const options = {
       page: await this.validarNullOuUndefined(request, "page"),
@@ -21,6 +23,18 @@ export default class RegistarHabilitacaoLiterariaController {
     } 
     
     const result = await this.#repo.listarTodos(options)
+
+    const clientIp = request.ip();
+
+    const { user }: any = auth;
+
+    Logger.info(
+      getLogFormated(user, "listar todos", "habilitações literárias"),
+      {
+        user_id: user.id,
+        ip: clientIp,
+      }
+    );
 
     return ok(result, null);
 

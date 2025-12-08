@@ -1,5 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import EliminarRepository from "../../repositories/eliminar-repository";
+import Logger from "Config/winston";
+import { getLogFormated } from "Config/constants";
 
 const { ok } = require("App/Helper/Http-helper");
 
@@ -13,6 +15,7 @@ export default class Controller {
     params,
     auth,
     response,
+    request
   }: HttpContextContract): Promise<any> {
     const { pessoaId } = params;
     const user_id = auth.user?.id;
@@ -24,6 +27,15 @@ export default class Controller {
         object: null,
       });
     }
+
+    const clientIp = request.ip();
+
+    const {user}: any = auth
+
+    Logger.info(getLogFormated(user, "eliminar", "funcionários em excepção"), {
+      user_id: user.id,
+      ip: clientIp,
+    });
 
     return ok(result, null);
   }

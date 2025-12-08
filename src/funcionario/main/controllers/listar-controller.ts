@@ -6,6 +6,8 @@ import { funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor } from '../
 import StringHelper from 'App/Helper/String';
 // import Event from '@ioc:Adonis/Core/Event'
 import { saveFuncionarioInRedisDB } from '../../eventos/employee-eventos';
+import Logger from 'Config/winston';
+import { getLogFormated } from 'Config/constants';
 
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 
@@ -22,7 +24,7 @@ export default class Controller {
 
   public async listarTodos({ auth, request, response }: HttpContextContract): Promise<any> {
 
-    console.time('listarTodos');
+    // console.time('listarTodos');
     const { user, orgao, orgao_detalhes }: any = auth.use('jwt').payload
 
     //console.log("USER:",user,"DETALHES DO ÓRGÃO:",orgao_detalhes)
@@ -110,7 +112,14 @@ export default class Controller {
       });
     }
 
-    console.timeEnd('listarTodos');
+    const clientIp = request.ip()
+
+    Logger.info(getLogFormated(user, 'a listagem', 'funcionários'), {
+      user_id: user.id,
+      ip: clientIp
+    })
+
+    // console.timeEnd('listarTodos');
     return ok(result, null);
   }
 
