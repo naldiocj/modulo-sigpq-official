@@ -2,16 +2,22 @@ import ModuleInterfaceController from "App/Repositories/modulo/ModuleInterfaceCo
 
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import CrudBaseRepositorio from "../../../repository/crud-base-repositorio";
+import Logger from "Config/winston";
+import { getLogFormated } from "Config/constants";
+import { useLogger } from "App/Helper/logger";
 
 const { ok } = require("App/Helper/Http-helper");
 export default class Controller implements ModuleInterfaceController {
   #crud: CrudBaseRepositorio;
   constructor() {
-    this.#crud = new CrudBaseRepositorio()
+    this.#crud = new CrudBaseRepositorio();
   }
 
-  public async listarTodos({ auth, request }: HttpContextContract): Promise<any> {
-    const { user, orgao }: any = auth.use('jwt')?.payload
+  public async listarTodos({
+    auth,
+    request,
+  }: HttpContextContract): Promise<any> {
+    const { user, orgao }: any = auth.use("jwt")?.payload;
     const options = {
       page: await this.validarNullOuUndefined(request, "page"),
       perPage: await this.validarNullOuUndefined(request, "perPage"),
@@ -20,7 +26,7 @@ export default class Controller implements ModuleInterfaceController {
       orderByAscOrDesc: request.input("orderByAscOrDesc") || "asc",
       numero: await this.validarNullOuUndefined(request, "numero"),
       pessoafisica_id: user?.pessoa_id || null,
-      estado: await this.validarNullOuUndefined(request, 'estado')
+      estado: await this.validarNullOuUndefined(request, "estado"),
     };
 
     const result = await this.#crud.listarTodos(options);
@@ -31,25 +37,23 @@ export default class Controller implements ModuleInterfaceController {
   public async registar({
     auth,
     request,
-    response
+    response,
   }: HttpContextContract): Promise<any> {
     const input: any = {
       ...request.all(),
       user_id: auth.user?.id,
     };
 
-
     const result = await this.#crud.registar(input, request);
-
 
     if (result instanceof Error) {
       return response.badRequest({
         message: result.message,
-        object: null
+        object: null,
       });
     }
 
-
+    useLogger(request, auth, "listar por guia", "mobilidades");
 
     return ok(null, "Sucesso ao dar tratamento na proposta!");
   }
@@ -58,46 +62,47 @@ export default class Controller implements ModuleInterfaceController {
     params,
     auth,
     request,
-    response
+    response,
   }: HttpContextContract): Promise<any> {
     console.log(params, auth, request, response);
   }
 
-  public async listarUm({ params,
-    response }: HttpContextContract): Promise<any> {
-
-    const result = await this.#crud.findById(params.id)
+  public async listarUm({
+    params,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const result = await this.#crud.findById(params.id);
 
     if (result instanceof Error)
       return response.badGateway({
         message: result.message,
-        object: null
-      })
+        object: null,
+      });
 
     return response.ok({
-      message: '',
-      object: result
-    })
+      message: "",
+      object: result,
+    });
   }
 
   public async eliminar({
     auth,
     params,
-    response
+    response,
   }: HttpContextContract): Promise<any> {
-    const { user } = auth
-    const result = await this.#crud.delete(params.id, null, user?.id)
+    const { user } = auth;
+    const result = await this.#crud.delete(params.id, null, user?.id);
 
     if (result instanceof Error)
       return response.badGateway({
         message: result.message,
-        object: null
-      })
+        object: null,
+      });
 
     return response.ok({
-      message: '',
-      object: result
-    })
+      message: "",
+      object: result,
+    });
   }
 
   async validarNullOuUndefined(request: any, field: any) {

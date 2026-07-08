@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ListarTodosRepository from '../../repositories/listar-todos-repositorio';
+import { useLogger } from 'App/Helper/logger';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -10,7 +11,7 @@ export default class ListarTodosController {
     this.#repo = new ListarTodosRepository()
   }
 
-  public async execute({ request, response }: HttpContextContract): Promise<any> {
+  public async execute({ request, response, auth }: HttpContextContract): Promise<any> {
 
     const options = {
       page: await this.validarNullOuUndefined(request, "page"),
@@ -32,6 +33,9 @@ export default class ListarTodosController {
         object: null,
       });
     }
+
+     useLogger(request, auth, "listar todos", "provimentos");
+
     return ok(result, null);
 
   }

@@ -17,7 +17,7 @@ export default class Controller {
   #crud
   redis = new RedisService();
   stringHelper = new StringHelper()
-  
+
   constructor() {
     this.#crud = new ListarRepository()
   }
@@ -85,7 +85,7 @@ export default class Controller {
       sigpq_tipo_seccao: orgao_detalhes.sigpq_tipo_seccao,
       sigpq_tipo_posto: orgao_detalhes.sigpq_tipo_posto
     }
-    
+
     let result: any;
 
     const options_aux = funcaoCompoatilhada_limparFiltroCaptarSomenteQuemTiverValor(options);
@@ -94,12 +94,10 @@ export default class Controller {
     try {
       // result = await this.redis.verificarSeExisteEArmazenaNoRedisNoFinalRetornaResultado('funcionario', funcionariokey, options_aux, this.#crud);
 
-      
-      result = await saveFuncionarioInRedisDB({key: funcionariokey, options});
 
+      // result = await saveFuncionarioInRedisDB({ key: funcionariokey, options });
 
-      // if (result === undefined || result === null || result === "undefined") {
-        result = await this.#crud.listarTodos(options_aux); 
+      result = await this.#crud.listarTodos(options_aux);
       // }
     } catch (error) {
       result = await this.#crud.listarTodos(options_aux);

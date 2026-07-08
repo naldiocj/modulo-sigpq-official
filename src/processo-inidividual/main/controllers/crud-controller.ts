@@ -1,40 +1,60 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
-import ModuleInterfaceController from 'App/Repositories/modulo/ModuleInterfaceController';
+import ModuleInterfaceController from "App/Repositories/modulo/ModuleInterfaceController";
 
-import CrudBaseRepository from '../../repositories/crud-base-repositorio';
+import CrudBaseRepository from "../../repositories/crud-base-repositorio";
+import Logger from "Config/winston";
+import { getLogFormated } from "Config/constants";
+import { useLogger } from "App/Helper/logger";
 
-const { ok } = require('App/Helper/Http-helper');
-
+const { ok } = require("App/Helper/Http-helper");
 
 export default class Controller implements ModuleInterfaceController {
-  #crud
+  #crud;
   constructor() {
-    this.#crud = new CrudBaseRepository()
+    this.#crud = new CrudBaseRepository();
   }
 
-  public async listarTodos({ request }: HttpContextContract): Promise<any> {
-
+  public async listarTodos({
+    request,
+    auth,
+  }: HttpContextContract): Promise<any> {
     const options = {
       page: await this.validarNullOuUndefined(request, "page"),
       perPage: await this.validarNullOuUndefined(request, "perPage"),
       search: await this.validarNullOuUndefined(request, "search"),
-      orderByAscOrDesc: request.input("orderByAscOrDesc") || 'asc',
-      pessoafisica_id: await this.validarNullOuUndefined(request, "pessoafisica_id"),
+      orderByAscOrDesc: request.input("orderByAscOrDesc") || "asc",
+      pessoafisica_id: await this.validarNullOuUndefined(
+        request,
+        "pessoafisica_id"
+      ),
       activo: await this.validarNullOuUndefined(request, "activo"),
-    }
+    };
 
-    const result = await this.#crud.listarTodos(options)
+    const result = await this.#crud.listarTodos(options);
+
+    const { user } = auth;
+
+    const clientIp = request.ip();
+
+    Logger.info(getLogFormated(user, "listar todas", "mobilidades"), {
+      user_id: user?.id,
+      ip: clientIp,
+    });
 
     return ok(result, null);
-
   }
 
-  public async activo({ params, auth, request, response }: HttpContextContract): Promise<any> {
+  public async activo({
+    params,
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     const input = {
       ...request.all(),
-      user_id: auth.user?.id
-    }
+      user_id: auth.user?.id,
+    };
 
     const result = await this.#crud.activo(params.id, input);
 
@@ -44,15 +64,27 @@ export default class Controller implements ModuleInterfaceController {
         object: null,
       });
 
-    return ok(null, 'Sucesso ao Atualziar Estado!');
+    const clientIp = request.ip();
+
+    const { user } = auth;
+
+    Logger.info(getLogFormated(user, "activo", "mobilidades"), {
+      user_id: user?.id,
+      ip: clientIp,
+    });
+
+    return ok(null, "Sucesso ao Atualziar Estado!");
   }
 
-  public async registar({ auth, request, response }: HttpContextContract): Promise<any> {
-
+  public async registar({
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     const input = {
       ...request.all(),
-      user_id: auth.user?.id
-    }
+      user_id: auth.user?.id,
+    };
 
     const result = await this.#crud.registar(input, request);
 
@@ -74,14 +106,21 @@ export default class Controller implements ModuleInterfaceController {
       // });
     }
 
-    return ok(null, 'Sucesso ao registar Departamento!');
+    useLogger(request, auth, "resgistar", "mobilidades");
+
+    return ok(null, "Sucesso ao registar Departamento!");
   }
 
-  public async editar({ params, auth, request, response }: HttpContextContract): Promise<any> {
+  public async editar({
+    params,
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     const input = {
       ...request.all(),
-      user_id: auth.user?.id
-    }
+      user_id: auth.user?.id,
+    };
 
     const result = await this.#crud.editar(params.id, input, request);
 
@@ -103,19 +142,30 @@ export default class Controller implements ModuleInterfaceController {
       // });
     }
 
-    return ok(null, 'Sucesso ao editar processo individual!');
+    useLogger(request, auth, "editar", "mobilidades");
+
+    return ok(null, "Sucesso ao editar processo individual!");
   }
 
-  public async listarUm({ auth, request, response }: HttpContextContract): Promise<any> {
+  public async listarUm({
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     console.log(auth, request, response);
   }
 
-  public async eliminar({ auth, request, response }: HttpContextContract): Promise<any> {
+  public async eliminar({
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     console.log(auth, request, response);
-
   }
 
   async validarNullOuUndefined(request: any, field: any) {
-    return ['null', undefined].includes(request.input(field)) ? null : request.input(field);
+    return ["null", undefined].includes(request.input(field))
+      ? null
+      : request.input(field);
   }
 }

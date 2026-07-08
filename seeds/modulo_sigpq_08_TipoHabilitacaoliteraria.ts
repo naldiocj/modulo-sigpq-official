@@ -102,6 +102,62 @@ export default class extends BaseSeeder {
         descricao: 'Criado automaticamente pelo sistema.',
         created_at: new Date(),
         updated_at: new Date()
+      },
+      {
+        nome: 'LICENCIADO',
+        sigla: 'Lic',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: '3º. ANO',
+        sigla: '3º',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: '4º. ANO',
+        sigla: '4º',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: 'TÉCNICO MÉDIO',
+        sigla: 'T.M',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: 'MESTRE',
+        sigla: 'Mst',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: 'TECNICO SUPERIOR',
+        sigla: 'T.S',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        nome: '2º. ANO',
+        sigla: '2º',
+        user_id: 1,
+        descricao: 'Criado automaticamente pelo sistema.',
+        created_at: new Date(),
+        updated_at: new Date()
       }
     ];
 

@@ -4,6 +4,7 @@ import RedisService from "../../../../../app/@piips/shared/service/redis/RedisSe
 
 import Redis from "@ioc:Adonis/Addons/Redis";
 import generateCacheKey from "App/@piips/shared/metodo-generico/Gerar-Hash-Com-Base-Numa-String";
+import { r } from "@faker-js/faker/dist/airline-DF6RqYmq";
 
 const redisService = new RedisService();
 const listRepository = new ListRepository();
@@ -43,16 +44,19 @@ Event.on("update:funcionario", async (data): Promise<any> => {
 });
 
 export async function saveFuncionarioInRedisDB(data: any) {
+  let options_aux = data.options;
   try {
     const { key, options } = data;
-    const options_aux =
-      await redisService.limparFiltroCaptarSomenteQuemTiverValor(options);
+    options_aux = await redisService.limparFiltroCaptarSomenteQuemTiverValor(options);
     const hash = await generateCacheKey(options_aux);
     const keyStorage = `search:${name}:orgao:${key}:hash:${hash}`;
     await Event.emit("update:funcionario", { key, keyStorage, options_aux });
-    const result =  await redisService.obterResultadoDoRedis$(keyStorage);
+    const result = await redisService.obterResultadoDoRedis$(keyStorage);
 
-     if (result && result.data && Array.isArray(result.data) && result.data.length === 0) {
+    const items: any[] = await listRepository.listarTodos(options_aux) ?? []
+
+    if (result && result.data && Array.isArray(result.data)
+      && result.data.length !== items.length) {
       listRepository.listarTodos(options_aux).then(async (dados) => {
         await redisService.storeHashField$(
           keyStorage,
@@ -70,5 +74,6 @@ export async function saveFuncionarioInRedisDB(data: any) {
     return result;
   } catch (error) {
     console.log(error);
+    return await listRepository.listarTodos(options_aux);
   }
 }

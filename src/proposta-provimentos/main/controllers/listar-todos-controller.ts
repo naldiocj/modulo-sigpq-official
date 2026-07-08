@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ListarTodosRepository from '../../repositories/listar-todos-repositorio';
+import { useLogger } from 'App/Helper/logger';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -40,6 +41,9 @@ export default class ListarTodosController {
         object: null,
       });
     }
+
+     useLogger(request, auth, "listar todos", "proposta provimentos");
+
     return ok(result, null);
 
   }

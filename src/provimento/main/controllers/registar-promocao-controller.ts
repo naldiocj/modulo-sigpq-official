@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import RegistarRepositorio from '../../repositories/registar-promocao-repositorio'
+import { useLogger } from 'App/Helper/logger'
 const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
 export default class RegistarController {
   #repo
@@ -25,6 +26,8 @@ export default class RegistarController {
         object: null,
       });
     }
+
+     useLogger(request, auth, "registar", "provimentos");
 
     return response.ok({
       message: 'Sucesso ao registar provimento!',

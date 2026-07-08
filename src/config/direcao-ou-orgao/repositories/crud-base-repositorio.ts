@@ -90,6 +90,7 @@ export default class CrudBaseRepository {
         tipo_pessoajuridica_id: 1,
         activo: input.activo,
         descricao: input.descricao,
+        orgao_comando_provincial: input.orgao_comando_provincial || null,
         tipo_estrutura_organica_sigla: input.tipo_estrutura_sigla,
         created_at: dateTime,
         updated_at: dateTime,

@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import RegistarRepositorio from '../../repositories/registar-propostas-repositorio'
+import { useLogger } from 'App/Helper/logger'
 
 export default class RegistarController {
   #repo:RegistarRepositorio
@@ -27,6 +28,8 @@ export default class RegistarController {
         object: null,
       });
     }
+
+     useLogger(request, auth, "registar", "proposta provimentos");
 
     return response.ok({
       message: 'Sucesso ao registar proposta!',

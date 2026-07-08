@@ -1,21 +1,23 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
-import ListarEmTempoRepositorio from '../../repositories/listar-em-tempo-repositorio'
+import ListarEmTempoRepositorio from "../../repositories/listar-em-tempo-repositorio";
+import { useLogger } from "App/Helper/logger";
 
-const { ok } = require('App/Helper/Http-helper');
-
+const { ok } = require("App/Helper/Http-helper");
 
 export default class ListarEmTempoController {
-  #repo: ListarEmTempoRepositorio
+  #repo: ListarEmTempoRepositorio;
   constructor() {
-    this.#repo = new ListarEmTempoRepositorio()
+    this.#repo = new ListarEmTempoRepositorio();
   }
 
-  public async execute({ params, response }: HttpContextContract): Promise<any> {
-
-
-
-    const result = await this.#repo.listarPorPessoa(params.pessoaId)
+  public async execute({
+    params,
+    response,
+    request,
+    auth
+  }: HttpContextContract): Promise<any> {
+    const result = await this.#repo.listarPorPessoa(params.pessoaId);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -23,11 +25,15 @@ export default class ListarEmTempoController {
         object: null,
       });
     }
-    return ok(result, null);
 
+    useLogger(request, auth, "listar em tempo por pessoa", "provimentos");
+
+    return ok(result, null);
   }
 
   async validarNullOuUndefined(request: any, field: any) {
-    return ['null', undefined].includes(request.input(field)) ? null : request.input(field);
+    return ["null", undefined].includes(request.input(field))
+      ? null
+      : request.input(field);
   }
 }

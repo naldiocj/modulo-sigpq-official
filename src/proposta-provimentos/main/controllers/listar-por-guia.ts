@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ListarPorGuiaRepository from '../../repositories/listar-por-guia';
+import { useLogger } from 'App/Helper/logger';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -50,6 +51,9 @@ export default class Controller {
                 object: null,
             });
         }
+
+         useLogger(request, auth, "listar por guia", "proposta provimentos");
+
         return ok(result, null);
 
     }

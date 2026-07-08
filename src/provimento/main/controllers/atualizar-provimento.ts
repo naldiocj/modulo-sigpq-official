@@ -1,23 +1,25 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import EditarProvimentoRepository from '../../repositories/editar-provimento'
-const removeTextNullVariable = require('App/@piips/shared/metodo-generico/RemoveTextNullVariable')
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import EditarProvimentoRepository from "../../repositories/editar-provimento";
+import { useLogger } from "App/Helper/logger";
+const removeTextNullVariable = require("App/@piips/shared/metodo-generico/RemoveTextNullVariable");
 export default class AtualizarController {
-  #repo
+  #repo;
   constructor() {
-    this.#repo = new EditarProvimentoRepository()
+    this.#repo = new EditarProvimentoRepository();
   }
 
-  public async execute({ params,auth, request, response }: HttpContextContract): Promise<any> {
-
-
-
+  public async execute({
+    params,
+    auth,
+    request,
+    response,
+  }: HttpContextContract): Promise<any> {
     const input = removeTextNullVariable({
       ...request.all(),
-      user_id: auth.user?.id
-    })
+      user_id: auth.user?.id,
+    });
 
-
-    const result = await this.#repo.editar(input,params.id)
+    const result = await this.#repo.editar(input, params.id);
 
     if (result instanceof Error) {
       return response.badRequest({
@@ -26,12 +28,11 @@ export default class AtualizarController {
       });
     }
 
+    useLogger(request, auth, "actualizar", "provimentos");
+
     return response.ok({
-      message: 'Sucesso ao atualizar provimento!',
+      message: "Sucesso ao atualizar provimento!",
       object: null,
     });
-
   }
-
-
 }

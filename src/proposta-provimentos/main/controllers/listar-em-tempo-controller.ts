@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ListarEmTempoRepositorio from '../../repositories/listar-em-tempo-repositorio'
+import { useLogger } from 'App/Helper/logger';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -61,6 +62,8 @@ export default class ListarEmTempoController {
         object: null,
       });
     }
+
+     useLogger(request, auth, "listar em tempo", "proposta provimentos");
 
     return ok(result, null);
 

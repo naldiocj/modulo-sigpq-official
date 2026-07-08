@@ -23,7 +23,7 @@ const {
   extensao_despacho,
 } = require("App/@piips/shared/metodo-generico/Buscar-Data-Extensao");
 
-import { mysql2 } from "./../../../../config/database/database";
+const { mysql2 } = require("../../../../config/database/database.js");
 
 export default class CrudBaseRepository {
   dateTime = new Date();
@@ -307,12 +307,12 @@ export default class CrudBaseRepository {
           //     ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
           //     : null,
 
-           ordem_descricao: input?.numero_ordem
-              ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
-              : null,
+          ordem_descricao: input?.numero_ordem
+            ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
+            : null,
           despacho_descricao: input?.numero_despacho
-              ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
-              : null,
+            ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
+            : null,
 
           despacho_data: input?.data_despacho ?? null,
           // numero_despacho:
@@ -324,12 +324,12 @@ export default class CrudBaseRepository {
           //     ? input?.numero_ordem
           //     : null,
 
-            numero_despacho: input?.numero_despacho 
-              ? input?.numero_despacho
-              : null,
+          numero_despacho: input?.numero_despacho
+            ? input?.numero_despacho
+            : null,
           numero_ordem: input?.numero_ordem
-              ? input?.numero_ordem
-              : null,
+            ? input?.numero_ordem
+            : null,
 
           acto_progressao_id: input?.sigpq_acto_progressao_id ?? 3,
           user_id: input.user_id,
@@ -377,9 +377,9 @@ export default class CrudBaseRepository {
           patente_id: input.patente_id,
           numero_despacho: input?.numero_despacho
             ? extensao_despacho(
-                input?.data_despacho_nomeacao,
-                input?.numero_despacho_nomeacao
-              )
+              input?.data_despacho_nomeacao,
+              input?.numero_despacho_nomeacao
+            )
             : null,
           numero_ordem: input?.numero_despacho_nomeacao ?? null,
           sigpq_acto_nomeacao_id: input?.sigpq_acto_nomeacao_id,
@@ -1290,9 +1290,9 @@ export default class CrudBaseRepository {
         } else {
           const doc = h.sigpq_documento_id
             ? await Database.from("sigpq_documentos")
-                .where("id", h?.sigpq_documento_id)
-                .where("pessoafisica_id", id)
-                .first()
+              .where("id", h?.sigpq_documento_id)
+              .where("pessoafisica_id", id)
+              .first()
             : null;
           let newDoc: any = null;
 
@@ -1397,19 +1397,19 @@ export default class CrudBaseRepository {
         //     : null,
 
         ordem_descricao: input?.numero_ordem
-            ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
-            : null,
+          ? extensao_ordem(input?.data_ordem, input?.numero_ordem)
+          : null,
         despacho_descricao: input?.numero_despacho
-            ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
-            : null,
+          ? extensao_despacho(input?.data_despacho, input?.numero_despacho)
+          : null,
 
         despacho_data: input?.data_despacho ?? null,
-        numero_despacho: input?.numero_despacho 
-            ? input?.numero_despacho
-            : null,
+        numero_despacho: input?.numero_despacho
+          ? input?.numero_despacho
+          : null,
         numero_ordem: input?.numero_ordem
-            ? input?.numero_ordem
-            : null,
+          ? input?.numero_ordem
+          : null,
 
         acto_progressao_id: input?.sigpq_acto_progressao_id ?? 3,
         user_id: input.user_id,
@@ -1441,8 +1441,8 @@ export default class CrudBaseRepository {
       } else {
         const d = p.sigpq_documento_id
           ? await Database.from("sigpq_documentos")
-              .where("id", p.sigpq_documento_id)
-              .where("pessoafisica_id", id)
+            .where("id", p.sigpq_documento_id)
+            .where("pessoafisica_id", id)
           : null;
 
         let newDoc: any = null;
@@ -1952,9 +1952,9 @@ export default class CrudBaseRepository {
           patente_id: input.patente_id,
           numero_despacho: input?.numero_despacho_nomeacao
             ? extensao_despacho(
-                input?.data_despacho_nomeacao,
-                input?.numero_despacho_nomeacao
-              )
+              input?.data_despacho_nomeacao,
+              input?.numero_despacho_nomeacao
+            )
             : null,
           numero_ordem: input?.numero_despacho_nomeacao ?? null,
           sigpq_acto_nomeacao_id: input?.sigpq_acto_nomeacao_id,
@@ -1968,8 +1968,8 @@ export default class CrudBaseRepository {
         if (item) {
           const d = p.item
             ? await Database.from("sigpq_documentos")
-                .where("id", item.sigpq_documento_id)
-                .where("pessoafisica_id", id)
+              .where("id", item.sigpq_documento_id)
+              .where("pessoafisica_id", id)
             : null;
 
           let newDoc: any = null;
@@ -3091,14 +3091,14 @@ export default class CrudBaseRepository {
             "DATE_FORMAT(f.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
           )
         )
-        .innerJoin("pessoas as p", "p.id", "f.id")
-        // .innerJoin("tipo_estrutura_organicas as t", "t.id", "f.tipo_estrutura_organica_id")
-        .innerJoin("pessoafisicas as pf", "pf.id", "f.id")
-        .innerJoin("regimes", "regimes.id", "pf.regime_id")
-        .innerJoin("pais", "pais.id", "pf.nacionalidade_id")
-        .innerJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
-        .innerJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
-        .innerJoin(
+        .leftJoin("pessoas as p", "p.id", "f.id")
+        // .leftJoin("tipo_estrutura_organicas as t", "t.id", "f.tipo_estrutura_organica_id")
+        .leftJoin("pessoafisicas as pf", "pf.id", "f.id")
+        .leftJoin("regimes", "regimes.id", "pf.regime_id")
+        .leftJoin("pais", "pais.id", "pf.nacionalidade_id")
+        .leftJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
+        .leftJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
+        .leftJoin(
           "sigpq_tipo_funcaos",
           "sigpq_tipo_funcaos.id",
           "f.tipo_funcao_id"
@@ -3128,7 +3128,7 @@ export default class CrudBaseRepository {
         .leftJoin("distritos", "distritos.id", "pf.distrito_id")
         .leftJoin("provincias", "provincias.id", "pf.naturalidade_id")
 
-        .where("sigpq_provimentos.activo", true)
+        // .where("sigpq_provimentos.activo", true)
         .where("p.eliminado", false)
         .where("f.id", id)
         .first();
@@ -3184,33 +3184,33 @@ export default class CrudBaseRepository {
 
       const sigpq_tipo_orgao = sigpq_orgao
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_orgao.pessoajuridica_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_orgao.pessoajuridica_id)
+          .first()
         : null;
       const sigpq_tipo_orgao_anterior = sigpq_orgao
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_orgao.pessoajuridica_passado_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_orgao.pessoajuridica_passado_id)
+          .first()
         : null;
 
       const sigpq_departamento = await Database.from({
@@ -3233,33 +3233,33 @@ export default class CrudBaseRepository {
 
       const sigpq_tipo_departamento = sigpq_departamento
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_departamento.pessoajuridica_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_departamento.pessoajuridica_id)
+          .first()
         : null;
       const sigpq_tipo_departamento_anterior = sigpq_departamento
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_departamento.pessoajuridica_passado_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_departamento.pessoajuridica_passado_id)
+          .first()
         : null;
 
       // const sigpq_unidade = await Database.from({ f: 'sigpq_funcionario_orgaos' })
@@ -3313,33 +3313,33 @@ export default class CrudBaseRepository {
 
       const sigpq_tipo_seccao = sigpq_seccao
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_seccao.pessoajuridica_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_seccao.pessoajuridica_id)
+          .first()
         : null;
       const sigpq_tipo_seccao_anterior = sigpq_seccao
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", sigpq_seccao.pessoajuridica_passado_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", sigpq_seccao.pessoajuridica_passado_id)
+          .first()
         : null;
 
       const posto_policial = await Database.from({
@@ -3362,33 +3362,33 @@ export default class CrudBaseRepository {
 
       const sigpq_tipo_posto = posto_policial
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", posto_policial.pessoajuridica_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", posto_policial.pessoajuridica_id)
+          .first()
         : null;
       const sigpq_tipo_posto_anterior = posto_policial
         ? await Database.from({ p: "pessoas" })
-            .select(
-              "*",
-              Database.raw(
-                "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
-              ),
-              Database.raw(
-                "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
-              )
+          .select(
+            "*",
+            Database.raw(
+              "DATE_FORMAT(p.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
+            ),
+            Database.raw(
+              "DATE_FORMAT(p.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
             )
-            .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
-            .where("p.id", posto_policial.pessoajuridica_passado_id)
-            .first()
+          )
+          .innerJoin("pessoajuridicas as pj", "pj.id", "p.id")
+          .where("p.id", posto_policial.pessoajuridica_passado_id)
+          .first()
         : null;
 
       const sigpq_curso = await Database.from({ c: "sigpq_cursos" })
@@ -3713,50 +3713,50 @@ export default class CrudBaseRepository {
   public async buscarNip(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.nip", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.nip", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
 
   public async buscarAgentePoNumero(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.numero_agente", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.numero_agente", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
   public async buscarNPS(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.nps", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.nps", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
 }

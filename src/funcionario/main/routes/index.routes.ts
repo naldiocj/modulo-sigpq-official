@@ -4,12 +4,14 @@ import meiosPoliciaisFuncionarioRoute from "./meios-policiais-funcionario-route"
 import crud from "./crud-base-route"
 import fichaFuncionarioApi from "./ficha-funcionario-route"
 import listar from "./listar-route"
+import importFuncionarioRoute from "./import-funcionario-route"
 
 // import perfil from "./perfil-route"
 
 export default function funcionario(ApiRoute: any, Route: any): void {
   ApiRoute((): void => {
     Route.group((): void => {
+      importFuncionarioRoute(Route)
       crud(Route);
       // perfil(Route);
       listar(Route)

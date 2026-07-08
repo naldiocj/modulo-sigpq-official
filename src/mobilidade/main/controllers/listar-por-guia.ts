@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import CrudBaseRepositorios from '../../repositories/crud-base-repositorio';
+import Logger from 'Config/winston';
+import { getLogFormated } from 'Config/constants';
 
 const { ok } = require('App/Helper/Http-helper');
 
@@ -50,6 +52,17 @@ export default class Controller {
         object: null,
       });
     }
+
+    const clientIp = request.ip();
+
+    Logger.info(
+      getLogFormated(user, "listar por guia", "mobilidades"),
+      {
+        user_id: user?.id,
+        ip: clientIp,
+      }
+    );
+
     return ok(result, null);
 
   }

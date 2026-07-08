@@ -1,6 +1,7 @@
 import Database from "@ioc:Adonis/Lucid/Database";
 import { funcaoCompoatilhada_isValidString } from "../../../@core/helpers/funcoesCompartilhadas";
 import { mysql2 } from "./../../../../config/database/database";
+
 export default class CrudBaseRepository {
   dateTime = new Date();
   #table = "sigpq_funcionarios";
@@ -81,6 +82,7 @@ export default class CrudBaseRepository {
         .where("sigpq_funcionario_orgaos.eliminado", false)
         .where("sigpq_funcionario_orgaos.nivel_colocacao", "muito-alto")
         .where("p.eliminado", false)
+        .groupBy('f.id')
         .offset(offset)
         .limit(perPage);
 
@@ -118,10 +120,10 @@ export default class CrudBaseRepository {
 
       this.aplicarFiltros(query, options);
 
-      if (options.page) {
+      if (options?.page) {
         const pagination: any = await query.paginate(
-          options.page,
-          options.perPage || 10
+          options?.page,
+          options?.perPage || 10
         );
         pagination.rows = await this.enriquecerDados(pagination.rows, trx);
         await trx.commit();
@@ -143,27 +145,26 @@ export default class CrudBaseRepository {
     return (
       Database.from({ f: "sigpq_funcionarios" })
         .useTransaction(trx)
-        ///.distinct('f.id')
         .select(
-          Database.raw("upper(p.nome_completo) as nome_completo"),
-          "p.activo",
-          "pj.sigla",
-          Database.raw("upper(pf.apelido) as apelido"),
-          "pf.genero",
+          Database.raw("ANY_VALUE(upper(p.nome_completo)) as nome_completo"),
+          Database.raw("ANY_VALUE(p.activo) as activo"),
+          Database.raw("ANY_VALUE(pj.sigla) as sigla"),
+          Database.raw("ANY_VALUE(upper(pf.apelido)) as apelido"),
+          Database.raw("ANY_VALUE(pf.genero) as genero"),
           "f.nip",
           "f.numero_processo",
           "f.numero_agente",
           "f.foto_efectivo",
           "f.id",
-          "fe.duracao_inatividade",
-          "fe.sigpq_estado_id",
-          "fe.sigpq_situacao_id",
-          "fe.sigpq_estado_reforma_id",
-          "situacao_estado.nome as nome_fora_atividade",
-          "es.nome as motivo_desistencia",
-          "regimes.quadro",
-          Database.raw("upper(se.nome) as estado"),
-          "patentes.nome as patente_nome",
+          Database.raw("ANY_VALUE(fe.duracao_inatividade) as duracao_inatividade"),
+          Database.raw("ANY_VALUE(fe.sigpq_estado_id) as sigpq_estado_id"),
+          Database.raw("ANY_VALUE(fe.sigpq_situacao_id) as sigpq_situacao_id"),
+          Database.raw("ANY_VALUE(fe.sigpq_estado_reforma_id) as sigpq_estado_reforma_id"),
+          Database.raw("ANY_VALUE(situacao_estado.nome) as nome_fora_atividade"),
+          Database.raw("ANY_VALUE(es.nome) as motivo_desistencia"),
+          Database.raw("ANY_VALUE(regimes.quadro) as quadro"),
+          Database.raw("ANY_VALUE(upper(se.nome)) as estado"),
+          Database.raw("ANY_VALUE(patentes.nome) as patente_nome"),
           Database.raw("DATE_FORMAT(f.data_adesao, '%d/%m/%Y') as data_adesao"),
           Database.raw(
             "DATE_FORMAT(f.created_at, '%d/%m/%Y %H:%i:%s') as created_at"
@@ -172,151 +173,131 @@ export default class CrudBaseRepository {
             "DATE_FORMAT(f.updated_at, '%d/%m/%Y %H:%i:%s') as updated_at"
           ),
           Database.raw(
-            "DATE_FORMAT(fe.data_inicio_inatividade, '%d/%m/%Y %H:%i:%s') as data_inicio_inatividade"
+            "ANY_VALUE(DATE_FORMAT(fe.data_inicio_inatividade, '%d/%m/%Y %H:%i:%s')) as data_inicio_inatividade"
           )
         )
-        .innerJoin("pessoas as p", "p.id", "f.id")
-        .innerJoin("pessoafisicas as pf", "pf.id", "f.id")
-        .innerJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
-        .innerJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
-        .innerJoin(
+        .leftJoin("pessoas as p", "p.id", "f.id")
+        .leftJoin("pessoafisicas as pf", "pf.id", "f.id")
+
+        .leftJoin(
           "sigpq_funcionario_orgaos",
           "sigpq_funcionario_orgaos.pessoafisica_id",
           "p.id"
         )
-        .innerJoin(
-          "pessoajuridicas as pj",
-          "pj.id",
-          "sigpq_funcionario_orgaos.pessoajuridica_id"
-        )
-        .innerJoin("regimes", "regimes.id", "pf.regime_id")
-        .innerJoin(
+
+        .leftJoin("regimes", "regimes.id", "pf.regime_id")
+        .leftJoin(
           "sigpq_funcionario_estados as fe",
           "fe.pessoafisica_id",
           "f.id"
         )
-        .innerJoin(
+        .leftJoin(
           "sigpq_situacao_estados as se",
           "se.id",
           "fe.sigpq_situacao_id"
         )
+        .leftJoin(
+          "pessoajuridicas as pj",
+          "pj.id",
+          "sigpq_funcionario_orgaos.pessoajuridica_id"
+        )
+        .leftJoin("sigpq_provimentos", "sigpq_provimentos.pessoa_id", "p.id")
+        .leftJoin("patentes", "patentes.id", "sigpq_provimentos.patente_id")
         .leftJoin(
           "sigpq_estados as situacao_estado",
           "situacao_estado.id",
           "fe.sigpq_estado_id"
         )
         .leftJoin("sigpq_estados as es", "es.id", "fe.sigpq_estado_reforma_id")
-        .where("sigpq_provimentos.activo", true)
-        .where("sigpq_provimentos.eliminado", false)
-        .where("sigpq_funcionario_orgaos.activo", true)
-        .where("sigpq_funcionario_orgaos.eliminado", false)
-        .where("sigpq_funcionario_orgaos.nivel_colocacao", "muito-alto")
-        .where("p.eliminado", false)
+        .groupBy('f.id')
     );
-    // .orderBy("p.updated_at", "desc")
-    // .orderBy('p.nome_completo', 'asc');
   }
 
   private aplicarFiltros(query: any, options: any) {
-    if (options.idadeMenos || options.idadeMais) {
+    if (options?.idadeMenos || options?.idadeMais) {
       this.filtrarPorIdade(query, options);
     }
 
-    if (options.anoMenos || options.anoMais) {
+    if (options?.anoMenos || options?.anoMais) {
       this.filtrarPorAno(query, options);
     }
 
-    if (options.regimeId) {
-      query.where("pf.regime_id", Number(options.regimeId));
+    if (options?.regimeId) {
+      query.where("pf.regime_id", Number(options?.regimeId));
     }
 
-    if (options.patenteId) {
-      query.where("patentes.id", Number(options.patenteId));
+    if (options?.patenteId) {
+      query.where("patentes.id", Number(options?.patenteId));
     }
 
-    if (options.tipoVinculoId) {
-      query.where("f.sigpq_tipo_vinculo_id", Number(options.tipoVinculoId));
+    if (options?.tipoVinculoId) {
+      query.where("f.sigpq_tipo_vinculo_id", Number(options?.tipoVinculoId));
     }
 
-    if (options.sigpq_estado_reforma_id) {
+    if (options?.sigpq_estado_reforma_id) {
       query.where(
         "fe.sigpq_estado_reforma_id",
-        Number(options.sigpq_estado_reforma_id)
+        Number(options?.sigpq_estado_reforma_id)
       );
     }
 
-    if (options.tipoOrgao_id) {
-      query.whereLike("pj.orgao_comando_provincial", options.tipoOrgao_id);
+    if (options?.tipoOrgao_id) {
+      query.whereLike("pj.orgao_comando_provincial", options?.tipoOrgao_id);
     }
 
-    if (options.aceder_todos_agentes) {
-      if (options.orgaoId) {
+    if (options?.aceder_todos_agentes) {
+      if (options?.orgaoId) {
         query.where(
           "sigpq_funcionario_orgaos.pessoajuridica_id",
-          options.orgaoId
+          options?.orgaoId
         );
       }
-      if (options.tipoOrgaoId) {
-        query.where("pj.tipo_estrutura_organica_sigla", options.tipoOrgaoId);
+      if (options?.tipoOrgaoId) {
+        query.where("pj.tipo_estrutura_organica_sigla", options?.tipoOrgaoId);
       }
     } else {
-      if (options.aceder_departamento) {
+      if (options?.aceder_departamento) {
         query
-          .innerJoin(
-            "sigpq_funcionario_orgaos as orgao",
-            "orgao.pessoafisica_id",
-            "p.id"
-          )
-          .where("orgao.nivel_colocacao", "alto")
-          .where("orgao.pessoajuridica_id", options.sigpq_tipo_departamento.id);
-      } else if (options.aceder_seccao) {
+          .where("sigpq_funcionario_orgaos.nivel_colocacao", "alto")
+          .where("sigpq_funcionario_orgaos.pessoajuridica_id", options?.sigpq_tipo_departamento.id);
+      } else if (options?.aceder_seccao) {
         query
-          .innerJoin(
-            "sigpq_funcionario_orgaos as orgao",
-            "orgao.pessoafisica_id",
-            "p.id"
-          )
-          .where("orgao.nivel_colocacao", "medio")
-          .where("orgao.pessoajuridica_id", options.sigpq_tipo_seccao.id);
-      } else if (options.aceder_posto_policial) {
+          .where("sigpq_funcionario_orgaos.nivel_colocacao", "medio")
+          .where("sigpq_funcionario_orgaos.pessoajuridica_id", options?.sigpq_tipo_seccao.id);
+      } else if (options?.aceder_posto_policial) {
         query
-          .innerJoin(
-            "sigpq_funcionario_orgaos as orgao",
-            "orgao.pessoafisica_id",
-            "p.id"
-          )
-          .where("orgao.nivel_colocacao", "baixo")
-          .where("orgao.pessoajuridica_id", options.sigpq_tipo_posto.id);
-      } else {
+          .where("sigpq_funcionario_orgaos.nivel_colocacao", "baixo")
+          .where("sigpq_funcionario_orgaos.pessoajuridica_id", options?.sigpq_tipo_posto.id);
+      } else if (options?.orgao?.id) {
         query.where(
           "sigpq_funcionario_orgaos.pessoajuridica_id",
-          options.orgao?.id
+          options.orgao.id
         );
       }
     }
 
-    if (options.genero) {
-      query.where("pf.genero", options.genero);
+    if (options?.genero) {
+      query.where("pf.genero", options?.genero);
     }
 
-    if (options.estadoId) {
-      query.where("fe.sigpq_estado_id", options.estadoId);
+    if (options?.estadoId) {
+      query.where("fe.sigpq_estado_id", options?.estadoId);
     }
 
-    if (options.situacaoId) {
-      query.where("fe.sigpq_situacao_id", options.situacaoId);
+    if (options?.situacaoId) {
+      // query.where("fe.sigpq_situacao_id", options?.situacaoId);
     }
 
-    if (options.forcaPassiva) {
-      query.where("fe.sigpq_situacao_id", "<>", options.forcaPassiva);
+    if (options?.forcaPassiva) {
+      query.where("fe.sigpq_situacao_id", "<>", options?.forcaPassiva);
     }
 
-    if (options.dashboard && options.patenteClasse) {
-      query.where("patentes.sigpq_tipo_carreira_id", options.patenteClasse);
+    if (options?.dashboard && options?.patenteClasse) {
+      query.where("patentes.sigpq_tipo_carreira_id", options?.patenteClasse);
     }
 
-    if (options.search) {
-      this.filtrarPorSearch(query, options.search);
+    if (options?.search) {
+      this.filtrarPorSearch(query, options?.search);
     }
 
     if (options.funcao_id) {
@@ -327,9 +308,9 @@ export default class CrudBaseRepository {
     }
 
     if (
-      options.situacaoId == 5 &&
-      options.sigpq_excluir_estado_reforma_id &&
-      !options.estadoId
+      options?.situacaoId == 5 &&
+      options?.sigpq_excluir_estado_reforma_id &&
+      !options?.estadoId
     ) {
       query.whereNotIn(
         "fe.sigpq_estado_reforma_id",
@@ -337,99 +318,99 @@ export default class CrudBaseRepository {
       );
     }
 
-    if (options.excluir_efectividade_e_inactividade) {
+    if (options?.excluir_efectividade_e_inactividade) {
       query.whereNotIn(
         "fe.sigpq_situacao_id",
-        options.excluir_efectividade_e_inactividade
+        options?.excluir_efectividade_e_inactividade
       );
     }
 
     if (!options.orderby) {
       //query.orderBy('p.updated_at', 'desc')
       query.orderBy('nome_completo', 'asc')
-    } 
-    else if (options.orderby == "PATENTE") query.orderBy("patentes.id", "asc");
-    else if (options.orderby == "NIP") query.orderBy("f.nip", "asc");
-    else if (options.orderby == "NOME") query.orderBy("nome_completo", "asc");
+    }
+    else if (options?.orderby == "PATENTE") query.orderBy("patentes.id", "asc");
+    else if (options?.orderby == "NIP") query.orderBy("f.nip", "asc");
+    else if (options?.orderby == "NOME") query.orderBy("nome_completo", "asc");
   }
 
   private filtrarPorIdade(query: any, options: any) {
-    if (options.idadeMenos == options.idadeMais) {
+    if (options?.idadeMenos == options?.idadeMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(pf.data_nascimento) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) = ${options.idadeMenos}
+              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) = ${options?.idadeMenos}
          END`
       );
-    } else if (options.idadeMenos < options.idadeMais) {
+    } else if (options?.idadeMenos < options?.idadeMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(pf.data_nascimento) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) BETWEEN ${options.idadeMenos} AND ${options.idadeMais}
+              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) BETWEEN ${options?.idadeMenos} AND ${options?.idadeMais}
          END`
       );
-    } else if (options.idadeMenos && !options.idadeMais) {
+    } else if (options?.idadeMenos && !options?.idadeMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(pf.data_nascimento) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) >= ${options.idadeMenos}
+              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) >= ${options?.idadeMenos}
          END`
       );
     } else if (
-      !options.idadeMenos &&
-      options.idadeMais &&
-      options.idadeMais > 18
+      !options?.idadeMenos &&
+      options?.idadeMais &&
+      options?.idadeMais > 18
     ) {
       query.whereRaw(
         `CASE
            WHEN DATE(pf.data_nascimento) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) BETWEEN 18 AND ${options.idadeMais}
+              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) BETWEEN 18 AND ${options?.idadeMais}
          END`
       );
-    } else if (options.idadeMenos > options.idadeMais) {
+    } else if (options?.idadeMenos > options?.idadeMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(pf.data_nascimento) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) >= ${options.idadeMenos}
+              TIMESTAMPDIFF(YEAR, pf.data_nascimento, CURDATE()) >= ${options?.idadeMenos}
          END`
       );
     }
   }
 
   private filtrarPorAno(query: any, options: any) {
-    if (options.anoMenos == options.anoMais) {
+    if (options?.anoMenos == options?.anoMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(f.data_adesao) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) = ${options.anoMenos}
+              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) = ${options?.anoMenos}
          END`
       );
-    } else if (options.anoMenos < options.anoMais) {
+    } else if (options?.anoMenos < options?.anoMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(f.data_adesao) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) BETWEEN ${options.anoMenos} AND ${options.anoMais}
+              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) BETWEEN ${options?.anoMenos} AND ${options?.anoMais}
          END`
       );
-    } else if (options.anoMenos && !options.anoMais) {
+    } else if (options?.anoMenos && !options?.anoMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(f.data_adesao) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) >= ${options.anoMenos}
+              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) >= ${options?.anoMenos}
          END`
       );
-    } else if (!options.anoMenos && options.anoMais && options.anoMais > 18) {
+    } else if (!options?.anoMenos && options?.anoMais && options?.anoMais > 18) {
       query.whereRaw(
         `CASE
            WHEN DATE(f.data_adesao) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) BETWEEN 18 AND ${options.anoMais}
+              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) BETWEEN 18 AND ${options?.anoMais}
          END`
       );
-    } else if (options.anoMenos > options.anoMais) {
+    } else if (options?.anoMenos > options?.anoMais) {
       query.whereRaw(
         `CASE
            WHEN DATE(f.data_adesao) < CURDATE() THEN
-              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) >= ${options.anoMenos}
+              TIMESTAMPDIFF(YEAR, f.data_adesao, CURDATE()) >= ${options?.anoMenos}
          END`
       );
     }
@@ -537,51 +518,51 @@ export default class CrudBaseRepository {
   public async buscarNip(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.nip", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.nip", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
 
   public async buscarAgentePoNumero(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.numero_agente", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.numero_agente", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
 
   public async buscarNPS(n: any, pessoaId: any = null) {
     return n
       ? await Database.from({ f: this.#table })
-          .join("pessoas as p", "p.id", "f.id")
-          .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
-          .where("f.nps", n)
-          .where("fo.eliminado", false)
-          .where("p.eliminado", false)
-          .where((query) => {
-            if (pessoaId) {
-              query.where("f.id", "<>", pessoaId);
-            }
-          })
-          .first()
+        .join("pessoas as p", "p.id", "f.id")
+        .join("sigpq_funcionario_orgaos as fo", "fo.pessoafisica_id", "f.id")
+        .where("f.nps", n)
+        .where("fo.eliminado", false)
+        .where("p.eliminado", false)
+        .where((query) => {
+          if (pessoaId) {
+            query.where("f.id", "<>", pessoaId);
+          }
+        })
+        .first()
       : null;
   }
 }
