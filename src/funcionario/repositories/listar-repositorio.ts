@@ -156,6 +156,7 @@ export default class CrudBaseRepository {
           "f.numero_agente",
           "f.foto_efectivo",
           "f.id",
+          "f.motivo_situacao_laboral ",
           Database.raw("ANY_VALUE(fe.duracao_inatividade) as duracao_inatividade"),
           Database.raw("ANY_VALUE(fe.sigpq_estado_id) as sigpq_estado_id"),
           Database.raw("ANY_VALUE(fe.sigpq_situacao_id) as sigpq_situacao_id"),
@@ -285,7 +286,7 @@ export default class CrudBaseRepository {
     }
 
     if (options?.situacaoId) {
-      // query.where("fe.sigpq_situacao_id", options?.situacaoId);
+      query.where("fe.sigpq_situacao_id", options?.situacaoId);
     }
 
     if (options?.forcaPassiva) {
