@@ -437,7 +437,7 @@ export default class CrudBaseRepository {
         tipo_cargo_id: input?.sigpq_tipo_cargo_id,
         foto_efectivo: foto_efectivo,
         sigpq_tipo_vinculo_id: input.sigpq_tipo_vinculo_id,
-        sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id,
+        sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id ?? 10,
         data_adesao: input.data_adesao,
         descricao: input.descricao,
         tipo_estrutura_organica_id: input?.tipo_orgao ?? null,
@@ -1429,6 +1429,7 @@ export default class CrudBaseRepository {
           .table("sigpq_documentos");
 
         provimento.sigpq_documento_id = documento[0];
+        provimento.acto_progressao_id = isNaN(input?.sigpq_acto_progressao_id) ? 3 : input?.sigpq_acto_progressao_id;
         await Database.insertQuery()
           .insert({
             ...provimento,
@@ -1479,7 +1480,7 @@ export default class CrudBaseRepository {
         pseudonimo: input.pseudonimo,
         numero_agente: input?.numero_agente,
         sigpq_tipo_vinculo_id: input.sigpq_tipo_vinculo_id,
-        sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id,
+        sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id ?? 10,
         data_adesao: input.data_adesao,
         descricao: input.descricao,
         updated_at: this.dateTime,

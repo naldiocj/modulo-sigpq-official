@@ -470,15 +470,15 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     trx: any = null
   ): Promise<any> {
     trx = trx ?? (await Database.transaction());
+    console.log(input)
     const data = new Date(input.guia_data);
-    const numero_guia_aux = input.numero_guia.split("/") || [];
-    const numero_guia = `${numero_guia_aux[0]}/${numero_guia_aux[1]}/${
-      numero_guia_aux[2]
-    }/${data.getFullYear()}`;
-    const despacho_aux = input.despacho.split("/") || [];
+    const numero_guia_aux = input.numero_guia.includes('/') ? input.numero_guia.split("/") : [];
+    const numero_guia = numero_guia_aux.length == 3 ? `${numero_guia_aux[0]}/${numero_guia_aux[1]}/${numero_guia_aux[2]
+      }/${data.getFullYear()}` : input.numero_guia;
+    const numero_despacho_aux = input.numero_despacho.includes('/') ? input.numero_despacho.split("/") : [];
     const despacho =
-      despacho_aux.length > 1
-        ? `${input.numero_despacho}/${despacho_aux[1]}`
+      numero_despacho_aux.length > 1
+        ? `${input.numero_despacho}/${numero_despacho_aux[1]}`
         : input.numero_despacho;
 
     const despacho_descricao = `${extensao_despacho(
@@ -1101,7 +1101,7 @@ export default class CrudBaseRepository extends BaseModuloRepository {
     }
   }
 
-  public async eliminar(id: any, trxParam = null): Promise<any> {}
+  public async eliminar(id: any, trxParam = null): Promise<any> { }
 
   public async listarTodosPorPessoa(options: any): Promise<any> {
     try {
@@ -1226,24 +1226,24 @@ export default class CrudBaseRepository extends BaseModuloRepository {
   public async buscarPessoaPorUserId(id: any): Promise<any> {
     return id
       ? await Database.from({ u: "users" })
-          .select("u.pessoa_id ")
-          .where("u.id", id)
-          .where("u.eliminado", false)
-          .where("u.activo", true)
-          .first()
+        .select("u.pessoa_id ")
+        .where("u.id", id)
+        .where("u.eliminado", false)
+        .where("u.activo", true)
+        .first()
       : null;
   }
 
   public async buscarOrgaoAnterior(pessoafisica_id: any, nivel: string) {
     return pessoafisica_id
       ? await Database.from({ o: "sigpq_funcionario_orgaos" })
-          .select("o.pessoajuridica_id as pessoajudidica_id_passado")
-          .where("o.pessoafisica_id", pessoafisica_id)
-          .where("o.eliminado", false)
-          .where("nivel_colocacao", nivel)
-          // .where('situacao', 'actual')
-          .where("o.activo", true)
-          .first()
+        .select("o.pessoajuridica_id as pessoajudidica_id_passado")
+        .where("o.pessoafisica_id", pessoafisica_id)
+        .where("o.eliminado", false)
+        .where("nivel_colocacao", nivel)
+        // .where('situacao', 'actual')
+        .where("o.activo", true)
+        .first()
       : null;
   }
 
@@ -1260,8 +1260,8 @@ export default class CrudBaseRepository extends BaseModuloRepository {
 
     const siglaOgao = orgaoPassado
       ? this.getSiglaSIC(orgaoPassado?.sigla) +
-        "/" +
-        this.getSiglaSIC(orgao?.sigla)
+      "/" +
+      this.getSiglaSIC(orgao?.sigla)
       : this.getSiglaSIC(orgao?.sigla);
     const guia = `${this.numeroAutomatico + 1}/${siglaOgao}/${anoGuia}`;
 
@@ -1278,10 +1278,10 @@ export default class CrudBaseRepository extends BaseModuloRepository {
   ): Promise<any> {
     return guia
       ? await Database.from({ f: "sigpq_funcionario_orgaos" })
-          .select("*")
-          .where("numero_guia", guia)
-          .where("pessoajuridica_id", "<>", pessoajuridicaId)
-          .first()
+        .select("*")
+        .where("numero_guia", guia)
+        .where("pessoajuridica_id", "<>", pessoajuridicaId)
+        .first()
       : null;
   }
 
