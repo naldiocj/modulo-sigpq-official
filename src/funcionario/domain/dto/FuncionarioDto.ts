@@ -9,6 +9,7 @@ export interface FuncionarioINPUT {
     anexo_processo: string
     numero_processo: string
     sigpq_tipo_vinculo_id: number
+    outra_provincia?: string
 }
 
 export interface FuncionarioOUTPUT {

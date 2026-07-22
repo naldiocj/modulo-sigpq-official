@@ -154,6 +154,35 @@ export default class CrudBaseRepository {
       const fileFE = file.file("foto_efectivo");
       foto_efectivo = fileFE ? await uploadFile(pessoaId[0], fileFE) : null;
 
+      let provinciaId = input.naturalidade_id
+      if (input.outra_provincia && input.outra_provincia.trim() !== '') {
+        const provinciaExistente = await Database.from('provincias')
+          .where('nome', input.outra_provincia.trim())
+          .where('eliminado', false)
+          .first()
+
+        if (provinciaExistente) {
+          provinciaId = provinciaExistente.id
+        } else {
+          const novaProvincia = await Database.insertQuery()
+            .table('provincias')
+            .useTransaction(trx)
+            .insert({
+              nome: input.outra_provincia.trim(),
+              sigla: input.outra_provincia.trim().substring(0, 10),
+              pais_id: 1,
+              user_id: input.user_id,
+              descricao: 'Criado pelo registo do funcionário.',
+              activo: true,
+              eliminado: false,
+              created_at: this.dateTime,
+              updated_at: this.dateTime,
+            })
+
+          provinciaId = novaProvincia[0]
+        }
+      }
+
       const pessoaFisica = {
         id: pessoaId,
         foto_civil: foto_civil,
@@ -165,7 +194,7 @@ export default class CrudBaseRepository {
         iban: input.iban,
         data_nascimento: input.data_nascimento,
         nacionalidade_id: 1,
-        naturalidade_id: input.naturalidade_id,
+        naturalidade_id: provinciaId,
         estado_civil_id: input.estado_civil_id,
         local_nascimento: input.local_nascimento,
         municipio_id: input.municipio_id,
@@ -1083,6 +1112,35 @@ export default class CrudBaseRepository {
         foto_efectivo = input?.foto_efectivo;
       }
 
+      let provinciaId = input.naturalidade_id
+      if (input.outra_provincia && input.outra_provincia.trim() !== '') {
+        const provinciaExistente = await Database.from('provincias')
+          .where('nome', input.outra_provincia.trim())
+          .where('eliminado', false)
+          .first()
+
+        if (provinciaExistente) {
+          provinciaId = provinciaExistente.id
+        } else {
+          const novaProvincia = await Database.insertQuery()
+            .table('provincias')
+            .useTransaction(trx)
+            .insert({
+              nome: input.outra_provincia.trim(),
+              sigla: input.outra_provincia.trim().substring(0, 10),
+              pais_id: 1,
+              user_id: input.user_id,
+              descricao: 'Criado pelo registo do funcionário.',
+              activo: true,
+              eliminado: false,
+              created_at: this.dateTime,
+              updated_at: this.dateTime,
+            })
+
+          provinciaId = novaProvincia[0]
+        }
+      }
+
       const pessoaFisica = {
         estado: input.estado,
         apelido: input.apelido,
@@ -1093,7 +1151,7 @@ export default class CrudBaseRepository {
         iban: input.iban,
         data_nascimento: input.data_nascimento,
         nacionalidade_id: 1,
-        naturalidade_id: input.naturalidade_id,
+        naturalidade_id: provinciaId,
         estado_civil_id: input.estado_civil_id,
         local_nascimento: input.local_nascimento,
         municipio_id: input.municipio_id,
