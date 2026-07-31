@@ -1,23 +1,25 @@
-import apiVerFuncionarioRoute from "./api-ver-funcionario-route"
-import meiosPoliciaisFuncionarioRoute from "./meios-policiais-funcionario-route"
+import apiVerFuncionarioRoute from "./api-ver-funcionario-route";
+import meiosPoliciaisFuncionarioRoute from "./meios-policiais-funcionario-route";
+import addFieldRoute from "./add-field-route";
 
-import crud from "./crud-base-route"
-import fichaFuncionarioApi from "./ficha-funcionario-route"
-import listar from "./listar-route"
-import importFuncionarioRoute from "./import-funcionario-route"
+import crud from "./crud-base-route";
+import fichaFuncionarioApi from "./ficha-funcionario-route";
+import listar from "./listar-route";
+import importFuncionarioRoute from "./import-funcionario-route";
 
 // import perfil from "./perfil-route"
 
 export default function funcionario(ApiRoute: any, Route: any): void {
   ApiRoute((): void => {
     Route.group((): void => {
-      importFuncionarioRoute(Route)
+      importFuncionarioRoute(Route);
       crud(Route);
       // perfil(Route);
-      listar(Route)
-      fichaFuncionarioApi(Route)
-      meiosPoliciaisFuncionarioRoute(Route)
-      apiVerFuncionarioRoute(Route)
-    }).prefix('/sigpq/funcionarios')
-  })
+      listar(Route);
+      fichaFuncionarioApi(Route);
+      meiosPoliciaisFuncionarioRoute(Route);
+      apiVerFuncionarioRoute(Route);
+      addFieldRoute(Route);
+    }).prefix("/sigpq/funcionarios");
+  });
 }

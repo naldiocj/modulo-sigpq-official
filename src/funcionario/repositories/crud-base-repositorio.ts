@@ -459,6 +459,8 @@ export default class CrudBaseRepository {
         numero_calcado: input?.numero_calcado,
         numero_camisa: input?.numero_camisa,
         numero_calca: input?.numero_calca,
+        altura: input?.altura,
+        numero_conta: input?.numero_conta,
         motivo_situacao_laboral: input?.motivo_situacao_laboral,
         tipo_funcao_id: input?.sigpq_tipo_funcao_id, // AQUI
         email_servico: input?.email_servico,
@@ -1631,6 +1633,20 @@ export default class CrudBaseRepository {
           .useTransaction(trx)
           .where("id", id)
           .update({ numero_calca: input?.numero_calca });
+      }
+
+      if (input?.altura) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ altura: input?.altura });
+      }
+
+      if (input?.numero_conta) {
+        await Database.from("sigpq_funcionarios")
+          .useTransaction(trx)
+          .where("id", id)
+          .update({ numero_conta: input?.numero_conta });
       }
 
       if (input?.motivo_situacao_laboral) {
@@ -3116,6 +3132,8 @@ export default class CrudBaseRepository {
           "f.numero_calcado",
           "f.numero_camisa",
           "f.numero_calca",
+          "f.altura",
+          "f.numero_conta",
           "sigpq_tipo_funcaos.nome as funcao",
           "f.tipo_estrutura_organica_id",
           "patentes.nome as patente_nome",
