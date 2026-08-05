@@ -1,7 +1,7 @@
-import CrudBaseRepository from "./crud-base-repositorio"
-import fs from 'fs';
-import path from 'path';
-import { parse } from 'csv-parse';
+import CrudBaseRepository from "./crud-base-repositorio";
+import fs from "fs";
+import path from "path";
+import { parse } from "csv-parse";
 import Database from "@ioc:Adonis/Lucid/Database";
 import NumeroAutomaticoService from "App/@piips/shared/service/NumeroAutomaticoService";
 
@@ -9,20 +9,73 @@ const {
   gerarUnicoNumeroParaProcesso,
 } = require("App/@piips/shared/metodo-generico/Gerar-Numero-Unico");
 
+const DEFAULT_DATE = "1900-01-01";
+
 export default class ImportFuncionarioRepository {
   dateTime = new Date();
   #funcionario: CrudBaseRepository;
   #numeroAutomaticoService: any;
+  #cachePatentes: any[] | null = null;
+  #cacheTipoFuncoes: any[] | null = null;
+  #cacheSituacoes: any[] | null = null;
 
   constructor() {
-    this.#funcionario = new CrudBaseRepository()
+    this.#funcionario = new CrudBaseRepository();
     this.#numeroAutomaticoService = new NumeroAutomaticoService();
+  }
+
+  async #listarPatentes(): Promise<any[]> {
+    if (this.#cachePatentes) return this.#cachePatentes;
+
+    try {
+      this.#cachePatentes = await Database.from("patentes")
+        .where("activo", true)
+        .where("eliminado", false)
+        .select("id", "nome");
+    } catch (e) {
+      console.log(e);
+      this.#cachePatentes = [];
+    }
+
+    return this.#cachePatentes;
+  }
+
+  async #listarTipoFuncoes(): Promise<any[]> {
+    if (this.#cacheTipoFuncoes) return this.#cacheTipoFuncoes;
+
+    try {
+      this.#cacheTipoFuncoes = await Database.from("sigpq_tipo_funcaos")
+        .where("activo", true)
+        .where("eliminado", false)
+        .select("id", "nome");
+    } catch (e) {
+      console.log(e);
+      this.#cacheTipoFuncoes = [];
+    }
+
+    return this.#cacheTipoFuncoes;
+  }
+
+  async #listarSituacoes(): Promise<any[]> {
+    if (this.#cacheSituacoes) return this.#cacheSituacoes;
+
+    try {
+      this.#cacheSituacoes = await Database.from("sigpq_situacao_estados")
+        .where("activo", true)
+        .where("eliminado", false)
+        .select("id", "nome");
+    } catch (e) {
+      console.log(e);
+      this.#cacheSituacoes = [];
+    }
+
+    return this.#cacheSituacoes;
   }
 
   public async importCsv(): Promise<any> {
     try {
-      const filePath = path.join(process.cwd(), 'DNI.csv');
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const filePath = path.join(process.cwd(), "UIT_CSV.csv");
+      const fileContent = fs.readFileSync(filePath, "utf-8");
 
       const records: any[] = await new Promise((resolve, reject) => {
         parse(
@@ -39,54 +92,91 @@ export default class ImportFuncionarioRepository {
         );
       });
 
-      const funcionarios = records.map((record: any) => {
+      const funcionarios: any[] = records.map((record: any) => {
         return {
           nome_completo: record.NOME_COMPLETO,
           tipo: "pf",
           activo: true,
           user_id: 1,
-          email: '',
-          apelido: record.NOME_COMPLETO.split(' ')[0],
-          genero: record.SEXO === 'M' ? 'M' : 'F',
-          data_nascimento: record.DATA_NASCIMENTO ? record.DATA_NASCIMENTO.split('/').reverse().join('-') : null,
+          email: "",
+          apelido: record.NOME_COMPLETO.split(" ")[0],
+          genero: record.SEXO === "M" ? "M" : "F",
+          data_nascimento: this.#parseData(record.DATA_NASCIMENTO),
           naturalidade_id: 1,
           estado_civil_id: 1,
-          local_nascimento: '',
+          local_nascimento: "",
           municipio_id: 1,
           distrito_id: 1,
           regime_id: 1,
           numero_agente: record.NUMERO_AGENTE,
           sigpq_tipo_sanguineo_id: 1,
           sigpq_tipo_vinculo_id: 1,
-          data_adesao: record.DATA_INGRESSO,
+          data_adesao: this.#parseData(record.DATA_INGRESSO),
           orgao_id: 1,
-          // patente_categoria: record.PATENTE_CATEGORIA,
+          patente_categoria: record.PATENTE_CATEGORIA,
           sigpq_tipo_funcao_id: 1,
           sigpq_tipo_cargo_id: 1,
-          nid: '',
-          data_expira: '',
-          residencia_bi: '',
-          data_emissao: '',
-          contacto: '',
-          contacto_alternativo: '',
-          contacto_profissional: '',
-          nome_mae: '',
-          nome_pai: '',
-          iban: '',
+          funcao: record.FUNCAO,
+          situacao_laboral: record.SITUACAO_LABORAL,
+          nid: record.NUMERO_BI,
+          data_expira: "",
+          residencia_bi: "",
+          data_emissao: "",
+          contacto: "",
+          contacto_alternativo: "",
+          contacto_profissional: "",
+          nome_mae: "",
+          nome_pai: "",
+          iban: "",
           habilitacoes_literarias: record.HABILITACOES_LITERARIAS,
           sigpq_situacao_id: null,
-          sigpq_estado_id: null
-        }
+          sigpq_estado_id: null,
+        };
       });
 
-      const results = [];
+      const falhas: any[] = [];
+      let inseridos = 0;
+
       for (const funcionario of funcionarios) {
-        // funcionario.patente_id = await this.#buscarPatenteId(funcionario.patente_categoria);
-        const result = await this.importFuncionarioDirectly(funcionario);
-        results.push(result);
+        funcionario.patente_id = await this.#buscarPatenteId(
+          funcionario.patente_categoria
+        );
+        funcionario.sigpq_tipo_funcao_id = await this.#buscarTipoFuncaoId(
+          funcionario.funcao
+        );
+        funcionario.sigpq_situacao_id = await this.#buscarSituacaoId(
+          funcionario.situacao_laboral
+        );
+
+        try {
+          const result = await this.importFuncionarioDirectly(funcionario);
+
+          if (result && result.duplicado) {
+            falhas.push({
+              nome: funcionario.nome_completo,
+              motivo: `Registo duplicado por ${result.motivo}: ${
+                result[result.motivo]
+              }`,
+            });
+            continue;
+          }
+
+          inseridos++;
+        } catch (e: any) {
+          console.log(e);
+
+          falhas.push({
+            nome: funcionario.nome_completo,
+            motivo: e?.message || "Erro desconhecido",
+          });
+        }
       }
 
-      return results;
+      return {
+        total: funcionarios.length,
+        inseridos,
+        falhas,
+      };
     } catch (e) {
       console.log(e);
 
@@ -97,28 +187,41 @@ export default class ImportFuncionarioRepository {
   #normalizar(str: string): string {
     return str
       .toUpperCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[ªº]/g, (m) => m === 'ª' ? 'A' : 'O')
-      .replace(/[.-]/g, ' ')
-      .replace(/\s+/g, ' ')
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[ªº]/g, (m) => (m === "ª" ? "A" : "O"))
+      .replace(/[.-]/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
-  async #buscarPatenteId(patenteCategoria: string): Promise<number> {
-    if (!patenteCategoria || patenteCategoria.trim() === '') return 1;
+  #parseData(value: string): string {
+    if (!value || value.trim() === "") return DEFAULT_DATE;
 
-    const patentes = await Database.from('patentes')
-      .where('activo', true)
-      .where('eliminado', false)
-      .select('id', 'nome');
+    const parts = value.split("/").filter((p) => p.trim() !== "");
+
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    if (parts.length === 2) {
+      return `${parts[1]}-${parts[0]}-01`;
+    }
+
+    return DEFAULT_DATE;
+  }
+
+  async #buscarPatenteId(patenteCategoria: string): Promise<number> {
+    if (!patenteCategoria || patenteCategoria.trim() === "") return 1;
+
+    const patentes = await this.#listarPatentes();
 
     const inputNorm = this.#normalizar(patenteCategoria);
-    const inputNoSpace = inputNorm.replace(/\s+/g, '');
+    const inputNoSpace = inputNorm.replace(/\s+/g, "");
 
     for (const p of patentes) {
       const dbNorm = this.#normalizar(p.nome);
-      const dbNoSpace = dbNorm.replace(/\s+/g, '');
+      const dbNoSpace = dbNorm.replace(/\s+/g, "");
 
       if (dbNorm === inputNorm || dbNoSpace === inputNoSpace) {
         return p.id;
@@ -127,14 +230,17 @@ export default class ImportFuncionarioRepository {
 
     for (const p of patentes) {
       const dbNorm = this.#normalizar(p.nome);
-      const dbNoSpace = dbNorm.replace(/\s+/g, '');
+      const dbNoSpace = dbNorm.replace(/\s+/g, "");
 
-      if (dbNoSpace.includes(inputNoSpace) || inputNoSpace.includes(dbNoSpace)) {
+      if (
+        dbNoSpace.includes(inputNoSpace) ||
+        inputNoSpace.includes(dbNoSpace)
+      ) {
         return p.id;
       }
     }
 
-    const firstWord = inputNorm.split(' ')[0];
+    const firstWord = inputNorm.split(" ")[0];
     for (const p of patentes) {
       const dbNorm = this.#normalizar(p.nome);
       if (dbNorm.includes(firstWord)) {
@@ -143,11 +249,13 @@ export default class ImportFuncionarioRepository {
     }
 
     const excecoes: Record<string, string> = {
-      'SUPERINDENTE': 'Superintendente',
+      SUPERINDENTE: "Superintendente",
     };
     for (const [key, value] of Object.entries(excecoes)) {
       if (this.#normalizar(key) === inputNorm) {
-        const match = patentes.find(p => this.#normalizar(p.nome) === this.#normalizar(value));
+        const match = patentes.find(
+          (p) => this.#normalizar(p.nome) === this.#normalizar(value)
+        );
         if (match) return match.id;
       }
     }
@@ -155,7 +263,69 @@ export default class ImportFuncionarioRepository {
     return 1;
   }
 
+  async #buscarTipoFuncaoId(funcao: string): Promise<number | null> {
+    if (!funcao || funcao.trim() === "") return null;
+
+    const funcoes = await this.#listarTipoFuncoes();
+
+    const inputNorm = this.#normalizar(funcao);
+
+    const match = funcoes.find((f) => this.#normalizar(f.nome) === inputNorm);
+    if (match) return match.id;
+
+    return null;
+  }
+
+  async #buscarSituacaoId(situacao: string): Promise<number> {
+    if (!situacao || situacao.trim() === "") return 1;
+
+    const situacoes = await this.#listarSituacoes();
+
+    const inputNorm = this.#normalizar(situacao);
+
+    const match = situacoes.find((s) => this.#normalizar(s.nome) === inputNorm);
+    if (match) return match.id;
+
+    const firstWord = inputNorm.split(" ")[0];
+    const partial = situacoes.find((s) =>
+      this.#normalizar(s.nome).includes(firstWord)
+    );
+    if (partial) return partial.id;
+
+    return 1;
+  }
+
   private async importFuncionarioDirectly(input: any): Promise<any> {
+    if (input.numero_agente) {
+      const agenteExistente = await Database.from("sigpq_funcionarios")
+        .where("numero_agente", input.numero_agente)
+        .first();
+
+      if (agenteExistente) {
+        return {
+          duplicado: true,
+          motivo: "numero_agente",
+          numero_agente: input.numero_agente,
+        };
+      }
+    }
+
+    if (input.nid) {
+      const nidExistente = await Database.from("sigpq_documentos")
+        .where("nid", input.nid)
+        .whereNotIn("nid", ["Pessoal", "Profissional"])
+        .where("eliminado", false)
+        .first();
+
+      if (nidExistente) {
+        return {
+          duplicado: true,
+          motivo: "nid",
+          nid: input.nid,
+        };
+      }
+    }
+
     let pessoaIdExiste: any = null;
     let funcionarioId: any = null;
 
@@ -212,7 +382,7 @@ export default class ImportFuncionarioRepository {
         nome_mae: input.nome_mae,
         nome_pai: input.nome_pai,
         iban: input.iban,
-        data_nascimento: input.data_nascimento ? input.data_nascimento.split('/').reverse().join('-') : null,
+        data_nascimento: input.data_nascimento,
         nacionalidade_id: 1,
         naturalidade_id: input.naturalidade_id,
         estado_civil_id: input.estado_civil_id,
@@ -280,7 +450,9 @@ export default class ImportFuncionarioRepository {
       }
 
       if (input.habilitacoes_literarias) {
-        const tipoHabilitacao = await Database.from("sigpq_tipo_habilitacaoliterarias")
+        const tipoHabilitacao = await Database.from(
+          "sigpq_tipo_habilitacaoliterarias"
+        )
           .where("nome", input.habilitacoes_literarias)
           .first();
 
@@ -323,7 +495,7 @@ export default class ImportFuncionarioRepository {
         foto_efectivo: foto_efectivo,
         sigpq_tipo_vinculo_id: input?.sigpq_tipo_vinculo_id,
         sigpq_tipo_sanguineo_id: input?.sigpq_tipo_sanguineo_id,
-        data_adesao: input.data_adesao ? input.data_adesao.split('/').reverse().join('-') : null,
+        data_adesao: input.data_adesao,
         descricao: input.descricao,
         tipo_estrutura_organica_id: input?.tipo_orgao ?? null,
         orgao_proveniencia: input?.orgao_proveniencia,
@@ -339,6 +511,24 @@ export default class ImportFuncionarioRepository {
 
       funcionario.id = fc[0];
       funcionarioId = fc[0];
+
+      if (Number(input.sigpq_tipo_funcao_id)) {
+        const sigpq_funcao = {
+          sigpq_tipo_funcao_id: input.sigpq_tipo_funcao_id,
+          pessoafisica_id: pessoaId,
+          pessoajuridica_id: input.orgao_id,
+          patente_id: input.patente_id,
+          situacao: "actual",
+          user_id: input.user_id,
+          created_at: this.dateTime,
+          updated_at: this.dateTime,
+        };
+
+        await Database.insertQuery()
+          .table("sigpq_funcaos")
+          .useTransaction(trx)
+          .insert(sigpq_funcao);
+      }
 
       if (input.sigpq_situacao_id) {
         const estadoFuncionario = {
@@ -366,7 +556,6 @@ export default class ImportFuncionarioRepository {
           .insert(estadoFuncionario);
       }
 
-
       // const orgao_colocado = {
       //   pessoajuridica_id: input.orgao_id,
       //   pessoafisica_id: pessoaId[0],
@@ -389,13 +578,8 @@ export default class ImportFuncionarioRepository {
       await trx.commit();
       return funcionarioId;
     } catch (e) {
-      // await this.#numeroAutomaticoService.gerarNumeroAutomaticoDesconto(
-      //   "Numero_Processo_Agente"
-      // );
-
       await trx.rollback();
-      console.log(e);
-      return Error("Registro não pode ser inserido na base de dados.");
+      throw e;
     }
   }
 }
