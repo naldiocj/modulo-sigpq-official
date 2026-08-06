@@ -9,5 +9,12 @@ export default function importFuncionarioRoute(Route: any): void {
             return new Ct().execute(ctx)
         })
             .middleware(['validateToken'])
+
+        Route.delete('import-csv/rollback', async (ctx: any): Promise<void> => {
+            const { default: Ct } = await controller
+
+            return new Ct().rollback(ctx)
+        })
+            .middleware(['validateToken'])
     })
 }

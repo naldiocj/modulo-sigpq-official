@@ -73,4 +73,46 @@ export default class Controller {
       });
     }
   }
+
+  public async rollback({
+    auth,
+    response,
+  }: HttpContextContract): Promise<any> {
+    const { user }: any = auth.use("jwt").payload;
+
+    if (!user) {
+      return response.badRequest({
+        message: "Utilizador não está logado",
+        object: null,
+      });
+    }
+
+    try {
+      const repository = new (
+        await import("../../repositories/import-funcionario-repositorio")
+      ).default();
+      const rollbackResult = await repository.rollbackPorBi();
+
+      if (rollbackResult instanceof Error) {
+        return response.badRequest({
+          message: rollbackResult.message,
+          object: null,
+        });
+      }
+
+      return ok(200, {
+        message: "Rollback concluído com sucesso",
+        registrosRemovidos: rollbackResult.removidos,
+        registrosTotal: rollbackResult.total,
+        falhas: rollbackResult.falhas,
+      });
+    } catch (e) {
+      console.log(e);
+
+      return response.internalServerError({
+        message: "Erro interno do servidor",
+        object: null,
+      });
+    }
+  }
 }
