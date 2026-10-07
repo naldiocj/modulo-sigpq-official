@@ -26,7 +26,7 @@ export default class MapaCargoDirecaoChefiaRepository {
             "DATE_FORMAT(updated_at, '%d/%m/%Y %H:%i:%s') as updatedAt"
           )
         )
-        .orderBy('nome', 'asc')
+        .orderBy("nome", "asc")
         .where("eliminado", false);
 
       const queryEfectivos = Database.from("sigpq_funcionarios")
@@ -61,19 +61,18 @@ export default class MapaCargoDirecaoChefiaRepository {
 
       const list: any = [];
       for (const funcao of funcoes) {
-
         // Masculino
         const masculino = await queryEfectivos
           .clone()
           .where("pessoafisicas.genero", "M") // Especial
-          .where('sigpq_funcaos.sigpq_tipo_funcao_id',funcao.id)
+          .where("sigpq_funcaos.sigpq_tipo_funcao_id", funcao.id)
           .first();
 
         // feminino
         const feminino = await queryEfectivos
           .clone()
           .where("pessoafisicas.genero", "F") // Especial
-          .where('sigpq_funcaos.sigpq_tipo_funcao_id',funcao.id)
+          .where("sigpq_funcaos.sigpq_tipo_funcao_id", funcao.id)
           .first();
 
         list.push({

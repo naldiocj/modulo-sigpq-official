@@ -7,6 +7,7 @@ import { jsPDF } from "jspdf";
 import Application from "@ioc:Adonis/Core/Application";
 import Logger from "Config/winston";
 import { getLogFormated } from "Config/constants";
+import { enviarPdf } from "../../../relatorios/main/pdf/pdf-response";
 
 export default class Controller {
   #crud;
@@ -58,12 +59,6 @@ export default class Controller {
     });
     doc.text("Hello world!", 10, 10);
 
-    // Salve o PDF em um arquivo
-    const filePath = "output.pdf";
-    doc.save(filePath);
-
-    response.header("Content-type", "application/pdf");
-
     const { user} = auth
 
     const clientIp = request.ip();
@@ -73,7 +68,7 @@ export default class Controller {
       ip: clientIp,
     });
 
-    return response.download(filePath);
-    // return ok(null, "Sucesso ao registar mobilidade!");
+    // PDF devolvido em memória — sem ficheiro partilhado em disco
+    return enviarPdf(response, doc, "mobilidade-individual");
   }
 }
